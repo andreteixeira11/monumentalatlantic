@@ -3,9 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen } from "lucide-react";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { ReservationsPage } from "./ReservationsPage";
 import { CalendarPage } from "./CalendarPage";
+import logoImage from "@/assets/logo.png";
 
 interface DashboardProps {
   onLogout: () => void;
@@ -48,101 +50,100 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <DashboardContent />;
     }
   };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-gradient-primary shadow-soft">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Home className="h-8 w-8 text-white" />
-            <h1 className="text-2xl font-bold text-white">Portal Alojamento</h1>
-          </div>
-          
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-2">
-            <Button 
-              variant={currentPage === "dashboard" ? "secondary" : "outline"}
-              size="sm" 
-              onClick={() => setCurrentPage("dashboard")}
-              className={currentPage === "dashboard" ? "bg-white/90 text-primary" : "bg-white/10 text-white border-white/30 hover:bg-white/20"}
-            >
-              <Home className="h-4 w-4 mr-2" />
-              Dashboard
-            </Button>
-            <Button 
-              variant={currentPage === "reservations" ? "secondary" : "outline"}
-              size="sm" 
-              onClick={() => setCurrentPage("reservations")}
-              className={currentPage === "reservations" ? "bg-white/90 text-primary" : "bg-white/10 text-white border-white/30 hover:bg-white/20"}
-            >
-              <BookOpen className="h-4 w-4 mr-2" />
-              Reservas
-            </Button>
-            <Button 
-              variant={currentPage === "calendar" ? "secondary" : "outline"}
-              size="sm" 
-              onClick={() => setCurrentPage("calendar")}
-              className={currentPage === "calendar" ? "bg-white/90 text-primary" : "bg-white/10 text-white border-white/30 hover:bg-white/20"}
-            >
-              <CalendarDays className="h-4 w-4 mr-2" />
-              Calendário
-            </Button>
-          </nav>
-
-          <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-              João Silva
-            </Badge>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onLogout}
-              className="bg-white/10 text-white border-white/30 hover:bg-white/20"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
         
-        {/* Mobile Navigation */}
-        <div className="md:hidden container mx-auto px-6 pb-4">
-          <div className="flex space-x-2">
-            <Button 
-              variant={currentPage === "dashboard" ? "secondary" : "outline"}
-              size="sm" 
-              onClick={() => setCurrentPage("dashboard")}
-              className={currentPage === "dashboard" ? "bg-white/90 text-primary" : "bg-white/10 text-white border-white/30"}
-            >
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </Button>
-            <Button 
-              variant={currentPage === "reservations" ? "secondary" : "outline"}
-              size="sm" 
-              onClick={() => setCurrentPage("reservations")}
-              className={currentPage === "reservations" ? "bg-white/90 text-primary" : "bg-white/10 text-white border-white/30"}
-            >
-              <BookOpen className="h-4 w-4 mr-1" />
-              Reservas
-            </Button>
-            <Button 
-              variant={currentPage === "calendar" ? "secondary" : "outline"}
-              size="sm" 
-              onClick={() => setCurrentPage("calendar")}
-              className={currentPage === "calendar" ? "bg-white/90 text-primary" : "bg-white/10 text-white border-white/30"}
-            >
-              <CalendarDays className="h-4 w-4 mr-1" />
-              Calendário
-            </Button>
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="bg-gradient-primary shadow-soft">
+            <div className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <SidebarTrigger className="text-white hover:bg-white/20" />
+                <h1 className="text-2xl font-bold text-white">Portal Alojamento</h1>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                  João Silva
+                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={onLogout}
+                  className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 p-6">
+            {renderPage()}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+};
+
+const AppSidebar = ({ currentPage, setCurrentPage }: { 
+  currentPage: "dashboard" | "reservations" | "calendar"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar") => void; 
+}) => {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+  const menuItems = [
+    { id: "dashboard" as const, title: "Dashboard", icon: Home },
+    { id: "reservations" as const, title: "Reservas", icon: BookOpen },
+    { id: "calendar" as const, title: "Calendário", icon: CalendarDays },
+  ];
+
+  return (
+    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
+      <SidebarContent>
+        {/* Logo */}
+        <div className="p-4 border-b">
+          <div className="flex items-center space-x-3">
+            <img 
+              src={logoImage} 
+              alt="Logo" 
+              className="h-8 w-8 object-contain"
+            />
+            {!isCollapsed && (
+              <span className="text-lg font-semibold">Monumental</span>
+            )}
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-6 py-8">
-        {renderPage()}
-      </div>
-    </div>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton 
+                    onClick={() => setCurrentPage(item.id)}
+                    className={`w-full ${
+                      currentPage === item.id 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:bg-accent"
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {!isCollapsed && <span>{item.title}</span>}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
