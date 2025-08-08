@@ -3,10 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu } from "lucide-react";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { ReservationsPage } from "./ReservationsPage";
 import { CalendarPage } from "./CalendarPage";
+import { GuestRegistryPage } from "./GuestRegistryPage";
+import { FinancesPage } from "./FinancesPage";
+import { MessagesPage } from "./MessagesPage";
+import { ReviewsPage } from "./ReviewsPage";
+import { TouristTaxPage } from "./TouristTaxPage";
 import logoImage from "@/assets/logo.png";
 
 interface DashboardProps {
@@ -38,7 +43,9 @@ const propertyTypeData = [
 ];
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
-  const [currentPage, setCurrentPage] = useState<"dashboard" | "reservations" | "calendar">("dashboard");
+  const [currentPage, setCurrentPage] = useState<
+    "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax"
+  >("dashboard");
 
   const renderPage = () => {
     switch (currentPage) {
@@ -46,6 +53,16 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <ReservationsPage />;
       case "calendar":
         return <CalendarPage />;
+      case "guests":
+        return <GuestRegistryPage />;
+      case "finances":
+        return <FinancesPage />;
+      case "messages":
+        return <MessagesPage />;
+      case "reviews":
+        return <ReviewsPage />;
+      case "tourist-tax":
+        return <TouristTaxPage />;
       default:
         return <DashboardContent />;
     }
@@ -92,8 +109,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 };
 
 const AppSidebar = ({ currentPage, setCurrentPage }: { 
-  currentPage: "dashboard" | "reservations" | "calendar"; 
-  setCurrentPage: (page: "dashboard" | "reservations" | "calendar") => void; 
+  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax") => void; 
 }) => {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -101,7 +118,12 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
   const menuItems = [
     { id: "dashboard" as const, title: "Dashboard", icon: Home },
     { id: "reservations" as const, title: "Reservas", icon: BookOpen },
-    { id: "calendar" as const, title: "Calendário", icon: CalendarDays },
+    { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
+    { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
+    { id: "finances" as const, title: "Finanças", icon: Banknote },
+    { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
+    { id: "reviews" as const, title: "Reviews", icon: StarIcon },
+    { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
   ];
 
   return (
