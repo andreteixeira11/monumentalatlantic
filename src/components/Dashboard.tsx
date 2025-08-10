@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building } from "lucide-react";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { ReservationsPage } from "./ReservationsPage";
 import { CalendarPage } from "./CalendarPage";
@@ -12,6 +12,7 @@ import { FinancesPage } from "./FinancesPage";
 import { MessagesPage } from "./MessagesPage";
 import { ReviewsPage } from "./ReviewsPage";
 import { TouristTaxPage } from "./TouristTaxPage";
+import { ProfileEditModal } from "./ProfileEditModal";
 import logoImage from "@/assets/logo.png";
 
 interface DashboardProps {
@@ -46,6 +47,18 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState<
     "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax"
   >("dashboard");
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: "João Silva",
+    email: "joao.silva@email.com",
+    phone: "+351 910 123 456",
+    company: "Monumental Atlantic",
+    address: "Rua de Santa Catarina, 1234",
+    city: "Porto",
+    country: "Portugal",
+    bio: "Gestor de alojamento local com mais de 5 anos de experiência.",
+    avatar: ""
+  });
 
   const renderPage = () => {
     switch (currentPage) {
@@ -83,9 +96,15 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
               </div>
               
               <div className="flex items-center space-x-4">
-                <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                  João Silva
-                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  {userProfile.name}
+                </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -103,6 +122,13 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
             {renderPage()}
           </main>
         </div>
+
+        <ProfileEditModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          currentProfile={userProfile}
+          onSave={setUserProfile}
+        />
       </div>
     </SidebarProvider>
   );

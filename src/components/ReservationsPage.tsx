@@ -7,6 +7,7 @@ import { Calendar, Search, Users, MapPin, Euro, Clock } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { ReservationDetailsModal } from "./ReservationDetailsModal";
 
 interface Reservation {
   id: string;
@@ -18,6 +19,17 @@ interface Reservation {
   nights: number;
   total: number;
   status: "confirmed" | "pending" | "cancelled" | "completed";
+  // Dados adicionais para os detalhes
+  guestEmail: string;
+  guestPhone: string;
+  guestDocument: string;
+  accommodationFee: number;
+  cleaningFee: number;
+  touristTax: number;
+  platformFee: number;
+  paymentMethod: string;
+  bookingPlatform: string;
+  specialRequests?: string;
 }
 
 const mockReservations: Reservation[] = [
@@ -30,7 +42,17 @@ const mockReservations: Reservation[] = [
     guests: 2,
     nights: 3,
     total: 450,
-    status: "confirmed"
+    status: "confirmed",
+    guestEmail: "maria.silva@email.com",
+    guestPhone: "+351 910 123 456",
+    guestDocument: "BI 12345678",
+    accommodationFee: 360,
+    cleaningFee: 50,
+    touristTax: 20,
+    platformFee: 20,
+    paymentMethod: "Cartão de Crédito",
+    bookingPlatform: "Booking.com",
+    specialRequests: "Check-in tardio solicitado"
   },
   {
     id: "RES-002", 
@@ -41,7 +63,16 @@ const mockReservations: Reservation[] = [
     guests: 4,
     nights: 5,
     total: 650,
-    status: "confirmed"
+    status: "confirmed",
+    guestEmail: "joao.santos@email.com",
+    guestPhone: "+351 920 234 567",
+    guestDocument: "CC 87654321",
+    accommodationFee: 500,
+    cleaningFee: 80,
+    touristTax: 40,
+    platformFee: 30,
+    paymentMethod: "PayPal",
+    bookingPlatform: "Airbnb"
   },
   {
     id: "RES-003",
@@ -52,7 +83,16 @@ const mockReservations: Reservation[] = [
     guests: 1,
     nights: 3,
     total: 390,
-    status: "completed"
+    status: "completed",
+    guestEmail: "ana.costa@email.com",
+    guestPhone: "+351 930 345 678",
+    guestDocument: "BI 11223344",
+    accommodationFee: 300,
+    cleaningFee: 40,
+    touristTax: 15,
+    platformFee: 35,
+    paymentMethod: "Transferência Bancária",
+    bookingPlatform: "Expedia"
   },
   {
     id: "RES-004",
@@ -63,7 +103,16 @@ const mockReservations: Reservation[] = [
     guests: 3,
     nights: 3,
     total: 480,
-    status: "pending"
+    status: "pending",
+    guestEmail: "pedro.oliveira@email.com",
+    guestPhone: "+351 940 456 789",
+    guestDocument: "CC 55667788",
+    accommodationFee: 390,
+    cleaningFee: 50,
+    touristTax: 25,
+    platformFee: 15,
+    paymentMethod: "Cartão de Débito",
+    bookingPlatform: "Booking.com"
   },
   {
     id: "RES-005",
@@ -74,7 +123,17 @@ const mockReservations: Reservation[] = [
     guests: 6,
     nights: 5,
     total: 750,
-    status: "confirmed"
+    status: "confirmed",
+    guestEmail: "carla.fernandes@email.com",
+    guestPhone: "+351 950 567 890",
+    guestDocument: "BI 99887766",
+    accommodationFee: 600,
+    cleaningFee: 100,
+    touristTax: 30,
+    platformFee: 20,
+    paymentMethod: "Cartão de Crédito",
+    bookingPlatform: "Airbnb",
+    specialRequests: "Berço para bebé necessário"
   }
 ];
 
@@ -111,6 +170,18 @@ const getStatusText = (status: string) => {
 export const ReservationsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleReservationClick = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedReservation(null);
+  };
 
   const filteredReservations = mockReservations.filter(reservation => {
     const matchesSearch = reservation.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -233,7 +304,11 @@ export const ReservationsPage = () => {
               </TableHeader>
               <TableBody>
                 {filteredReservations.map((reservation) => (
-                  <TableRow key={reservation.id} className="hover:bg-accent/50">
+                  <TableRow 
+                    key={reservation.id} 
+                    className="hover:bg-accent/50 cursor-pointer"
+                    onClick={() => handleReservationClick(reservation)}
+                  >
                     <TableCell className="font-medium">{reservation.id}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
@@ -277,6 +352,12 @@ export const ReservationsPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ReservationDetailsModal
+        reservation={selectedReservation}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

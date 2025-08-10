@@ -169,58 +169,124 @@ export const FinancesPage = () => {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-soft">
+            <Card className="shadow-soft bg-gradient-to-br from-card to-card/50 border-primary/20">
               <CardHeader>
-                <CardTitle>Evolução Financeira</CardTitle>
+                <CardTitle className="text-xl">Evolução Financeira</CardTitle>
                 <CardDescription>
                   Receitas, despesas e lucro por mês
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={monthlyFinanceData}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={monthlyFinanceData} barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" strokeOpacity={0.3} />
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    />
                     <Tooltip 
                       formatter={(value, name) => [
                         `€${value}`,
                         name === 'revenue' ? 'Receita' : 
                         name === 'expenses' ? 'Despesas' : 'Lucro'
                       ]}
-                      labelStyle={{ color: 'hsl(225, 25%, 15%)' }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--popover))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 30px -10px hsl(var(--primary) / 0.3)'
+                      }}
                     />
-                    <Bar dataKey="revenue" fill="hsl(142, 76%, 36%)" name="revenue" radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="expenses" fill="hsl(0, 84%, 60%)" name="expenses" radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="profit" fill="hsl(217, 91%, 60%)" name="profit" radius={[2, 2, 0, 0]} />
+                    <Bar 
+                      dataKey="revenue" 
+                      fill="hsl(var(--success))" 
+                      name="revenue" 
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={60}
+                    />
+                    <Bar 
+                      dataKey="expenses" 
+                      fill="hsl(var(--destructive))" 
+                      name="expenses" 
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={60}
+                    />
+                    <Bar 
+                      dataKey="profit" 
+                      fill="hsl(var(--primary))" 
+                      name="profit" 
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={60}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft">
+            <Card className="shadow-soft bg-gradient-to-br from-card to-card/50 border-primary/20">
               <CardHeader>
-                <CardTitle>Categorias de Despesas</CardTitle>
+                <CardTitle className="text-xl">Categorias de Despesas</CardTitle>
                 <CardDescription>
                   Distribuição das despesas por categoria
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={320}>
                   <RechartsPieChart>
                     <Pie
                       data={expenseCategories}
                       cx="50%"
                       cy="50%"
-                      outerRadius={100}
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={3}
                       dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
+                      labelLine={false}
+                      label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                        const RADIAN = Math.PI / 180;
+                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                        return (
+                          <text 
+                            x={x} 
+                            y={y} 
+                            fill="white" 
+                            textAnchor={x > cx ? 'start' : 'end'} 
+                            dominantBaseline="central"
+                            fontSize={12}
+                            fontWeight="500"
+                          >
+                            {`${(percent * 100).toFixed(0)}%`}
+                          </text>
+                        );
+                      }}
                     >
                       {expenseCategories.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color}
+                          stroke="hsl(var(--background))"
+                          strokeWidth={2}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--popover))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 30px -10px hsl(var(--primary) / 0.3)'
+                      }}
+                    />
                   </RechartsPieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -228,29 +294,67 @@ export const FinancesPage = () => {
           </div>
 
           {/* Profit Trend */}
-          <Card className="shadow-soft">
+          <Card className="shadow-soft bg-gradient-to-br from-card to-card/50 border-primary/20">
             <CardHeader>
-              <CardTitle>Tendência de Lucro</CardTitle>
+              <CardTitle className="text-xl">Tendência de Lucro</CardTitle>
               <CardDescription>
-                Evolução do lucro mensal
+                Evolução do lucro mensal com área sombreada
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={monthlyFinanceData}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <defs>
+                    <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="hsl(var(--muted))" 
+                    strokeOpacity={0.3} 
+                  />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                  />
                   <Tooltip 
                     formatter={(value) => [`€${value}`, 'Lucro']}
-                    labelStyle={{ color: 'hsl(225, 25%, 15%)' }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      boxShadow: '0 10px 30px -10px hsl(var(--primary) / 0.3)'
+                    }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="profit" 
-                    stroke="hsl(217, 91%, 60%)" 
-                    strokeWidth={3}
-                    dot={{ fill: 'hsl(217, 91%, 60%)', strokeWidth: 2, r: 6 }}
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={4}
+                    dot={{ 
+                      fill: 'hsl(var(--primary))', 
+                      strokeWidth: 3, 
+                      r: 8,
+                      stroke: 'hsl(var(--background))'
+                    }}
+                    activeDot={{ 
+                      r: 10, 
+                      fill: 'hsl(var(--primary))',
+                      stroke: 'hsl(var(--background))',
+                      strokeWidth: 3,
+                      filter: 'drop-shadow(0 4px 6px hsl(var(--primary) / 0.3))'
+                    }}
+                    fill="url(#profitGradient)"
                   />
                 </LineChart>
               </ResponsiveContainer>

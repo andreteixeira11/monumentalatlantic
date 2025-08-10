@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { Settings, Key, Building, Hash, Send, CheckCircle, XCircle } from "lucide-react";
+import { Settings, Key, Building, Hash, Send, CheckCircle, XCircle, Link, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SibaConfig {
@@ -22,7 +22,8 @@ interface GuestRegistry {
   checkInDate: string;
   checkOutDate: string;
   property: string;
-  status: "pending" | "sent" | "confirmed" | "error";
+  status: "pending" | "sent" | "confirmed" | "error" | "link-sent";
+  guestFormLink?: string;
 }
 
 const mockGuestRegistries: GuestRegistry[] = [
@@ -58,6 +59,18 @@ const mockGuestRegistries: GuestRegistry[] = [
     checkOutDate: "2024-12-13",
     property: "Loft Ribeira",
     status: "error"
+  },
+  {
+    id: "REG-004",
+    guestName: "Pedro Oliveira",
+    documentNumber: "",
+    documentType: "",
+    nationality: "",
+    checkInDate: "2025-01-05",
+    checkOutDate: "2025-01-08",
+    property: "Apartamento Centro Porto",
+    status: "link-sent",
+    guestFormLink: "https://portal.example.com/guest-form/token123"
   }
 ];
 
@@ -81,6 +94,8 @@ export const GuestRegistryPage = () => {
         return "bg-destructive/20 text-destructive border-destructive/30";
       case "pending":
         return "bg-muted/50 text-muted-foreground border-muted/30";
+      case "link-sent":
+        return "bg-primary/20 text-primary border-primary/30";
       default:
         return "bg-muted/50 text-muted-foreground border-muted/30";
     }
@@ -94,6 +109,8 @@ export const GuestRegistryPage = () => {
         return <Send className="h-4 w-4" />;
       case "error":
         return <XCircle className="h-4 w-4" />;
+      case "link-sent":
+        return <Link className="h-4 w-4" />;
       default:
         return null;
     }
@@ -120,6 +137,31 @@ export const GuestRegistryPage = () => {
     toast({
       title: "Enviado para SIBA",
       description: "O registo foi enviado para o SIBA com sucesso.",
+    });
+  };
+
+  const handleGenerateGuestLink = (registryId: string) => {
+    const guestFormLink = `https://portal.example.com/guest-form/${registryId}`;
+    
+    toast({
+      title: "Link Gerado",
+      description: "Link de preenchimento gerado com sucesso. Envie este link ao hóspede.",
+    });
+    
+    // Simular envio de email
+    setTimeout(() => {
+      toast({
+        title: "Email Enviado",
+        description: "O link foi enviado por email ao hóspede.",
+      });
+    }, 1500);
+  };
+
+  const handleCopyLink = (link: string) => {
+    navigator.clipboard.writeText(link);
+    toast({
+      title: "Link Copiado",
+      description: "O link foi copiado para a área de transferência.",
     });
   };
 
@@ -211,6 +253,36 @@ export const GuestRegistryPage = () => {
         </CardContent>
       </Card>
 
+      {/* Guest Form Link Generation */}
+      <Card className="shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Link className="h-5 w-5" />
+            <span>Link para Hóspedes</span>
+          </CardTitle>
+          <CardDescription>
+            Gere links para os hóspedes preencherem os seus dados antes do check-in
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <h4 className="font-semibold mb-2">Como funciona:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                <li>Gere um link único para cada reserva</li>
+                <li>O link é enviado automaticamente por email ao hóspede</li>
+                <li>O hóspede preenche os dados online antes do check-in</li>
+                <li>Os dados aparecem aqui para confirmar e enviar ao SIBA</li>
+              </ol>
+            </div>
+            <Button onClick={() => handleGenerateGuestLink("NEW-REG")} className="w-full">
+              <Link className="h-4 w-4 mr-2" />
+              Gerar Novo Link para Hóspede
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Guest Registries */}
       <Card className="shadow-soft">
         <CardHeader>
@@ -237,30 +309,72 @@ export const GuestRegistryPage = () => {
                           {registry.status === "sent" && "Enviado"}
                           {registry.status === "error" && "Erro"}
                           {registry.status === "pending" && "Pendente"}
+                          {registry.status === "link-sent" && "Link Enviado"}
                         </span>
                       </div>
                     </Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    <span className="mr-4">Doc: {registry.documentType} {registry.documentNumber}</span>
-                    <span className="mr-4">Nacionalidade: {registry.nationality}</span>
+                    {registry.status === "link-sent" ? (
+                      <span className="text-primary">Aguardando preenchimento do formulário pelo hóspede</span>
+                    ) : (
+                      <>
+                        <span className="mr-4">Doc: {registry.documentType} {registry.documentNumber}</span>
+                        <span className="mr-4">Nacionalidade: {registry.nationality}</span>
+                      </>
+                    )}
                     <span>Propriedade: {registry.property}</span>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Check-in: {registry.checkInDate} | Check-out: {registry.checkOutDate}
                   </div>
+                  {registry.guestFormLink && (
+                    <div className="mt-2 flex items-center space-x-2">
+                      <Input 
+                        value={registry.guestFormLink} 
+                        readOnly 
+                        className="text-xs h-8"
+                      />
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleCopyLink(registry.guestFormLink!)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex space-x-2">
-                  {registry.status === "pending" || registry.status === "error" ? (
+                  {registry.status === "link-sent" ? (
                     <Button
                       size="sm"
-                      onClick={() => handleSendToSiba(registry.id)}
-                      disabled={!isConfigured}
+                      variant="outline"
+                      onClick={() => handleGenerateGuestLink(registry.id)}
                     >
-                      <Send className="h-4 w-4 mr-2" />
-                      Enviar
+                      <Link className="h-4 w-4 mr-2" />
+                      Reenviar Link
                     </Button>
+                  ) : registry.status === "pending" || registry.status === "error" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleGenerateGuestLink(registry.id)}
+                      >
+                        <Link className="h-4 w-4 mr-2" />
+                        Enviar Link
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSendToSiba(registry.id)}
+                        disabled={!isConfigured}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Enviar
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       size="sm"
