@@ -2,8 +2,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Euro, TrendingUp, TrendingDown, Calendar, Plus, Receipt, PieChart } from "lucide-react";
+import { Euro, TrendingUp, TrendingDown, Calendar, Plus, Receipt, PieChart, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const monthlyFinanceData = [
   { month: "Jan", revenue: 2400, expenses: 800, profit: 1600 },
@@ -154,6 +156,79 @@ const monthlyOverviewData = [
 ];
 
 export const FinancesPage = () => {
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Configurações do PDF
+    doc.setFontSize(20);
+    doc.text('Relatório Financeiro', 14, 22);
+    
+    doc.setFontSize(12);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 32);
+    
+    // Adicionar estatísticas resumidas
+    doc.setFontSize(14);
+    doc.text('Resumo Atual', 14, 50);
+    doc.setFontSize(10);
+    doc.text(`Receita Mês Atual: €${currentMonthStats.revenue.toLocaleString()}`, 14, 60);
+    doc.text(`Despesas Mês Atual: €${currentMonthStats.expenses.toLocaleString()}`, 14, 68);
+    doc.text(`Lucro Mês Atual: €${currentMonthStats.profit.toLocaleString()}`, 14, 76);
+    doc.text(`Margem de Lucro: ${currentMonthStats.profitMargin}%`, 14, 84);
+    
+    // Preparar dados para a tabela
+    const tableData = monthlyOverviewData.map(data => [
+      data.month,
+      `€${data.estadia.toLocaleString()}`,
+      `€${data.taxaLimpeza.toLocaleString()}`,
+      `€${data.valorTotalFaturado.toLocaleString()}`,
+      `-€${data.comissaoBooking.toLocaleString()}`,
+      `-€${data.limpezaJack.toLocaleString()}`,
+      `-€${data.consumiveisJack.toLocaleString()}`,
+      `-€${data.comissaoGestao.toLocaleString()}`,
+      `-€${data.despesasGerais.toLocaleString()}`,
+      `-€${data.autoliquidacaoIVA.toLocaleString()}`,
+      `-€${data.agua.toLocaleString()}`,
+      `-€${data.luz.toLocaleString()}`,
+      `-€${data.internet.toLocaleString()}`,
+      `-€${data.brindesHospedes.toLocaleString()}`,
+      `€${data.valorAntesImposto.toLocaleString()}`,
+      `-€${data.irs.toLocaleString()}`,
+      `€${data.valorLiquido.toLocaleString()}`
+    ]);
+    
+    // Adicionar tabela
+    (doc as any).autoTable({
+      head: [[
+        'Mês', 'Estadia', 'Taxa Limpeza', 'Total Faturado',
+        'Comissão Booking', 'Limpeza (Jack)', 'Consumíveis',
+        'Comissão Gestão', 'Despesas Gerais', 'Autoliq. IVA',
+        'Água', 'Luz', 'Internet', 'Brindes',
+        'Antes Imposto', 'IRS (10%)', 'Valor Líquido'
+      ]],
+      body: tableData,
+      startY: 100,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [34, 197, 94], // Verde
+        textColor: 255,
+        fontSize: 7,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        0: { cellWidth: 15 },
+        16: { fillColor: [240, 253, 244], textColor: [22, 163, 74], fontStyle: 'bold' }
+      },
+      alternateRowStyles: {
+        fillColor: [249, 250, 251]
+      }
+    });
+    
+    // Salvar o PDF
+    doc.save(`relatorio-financeiro-${new Date().toISOString().split('T')[0]}.pdf`);
+  };
 
   return (
     <div className="space-y-6">
@@ -163,6 +238,13 @@ export const FinancesPage = () => {
           <h1 className="text-3xl font-bold">Finanças</h1>
           <p className="text-muted-foreground">Visão geral das suas finanças e desempenho</p>
         </div>
+        <Button 
+          onClick={generatePDF}
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+        >
+          <Download className="h-4 w-4" />
+          Download PDF
+        </Button>
       </div>
 
       <div className="space-y-6">
