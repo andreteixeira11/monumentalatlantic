@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User } from "lucide-react";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ReservationsPage } from "./ReservationsPage";
 import { CalendarPage } from "./CalendarPage";
 import { GuestRegistryPage } from "./GuestRegistryPage";
@@ -12,6 +13,7 @@ import { FinancesPage } from "./FinancesPage";
 import { MessagesPage } from "./MessagesPage";
 import { ReviewsPage } from "./ReviewsPage";
 import { TouristTaxPage } from "./TouristTaxPage";
+import { ExpensesPage } from "./ExpensesPage";
 import { ProfileEditModal } from "./ProfileEditModal";
 import logoImage from "@/assets/logo.png";
 
@@ -45,7 +47,7 @@ const propertyTypeData = [
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState<
-    "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax"
+    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax"
   >("dashboard");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -68,8 +70,10 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <CalendarPage />;
       case "guests":
         return <GuestRegistryPage />;
-      case "finances":
+      case "finances-report":
         return <FinancesPage />;
+      case "finances-expenses":
+        return <ExpensesPage onBack={() => setCurrentPage("finances-report")} />;
       case "messages":
         return <MessagesPage />;
       case "reviews":
@@ -135,21 +139,26 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 };
 
 const AppSidebar = ({ currentPage, setCurrentPage }: { 
-  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax"; 
-  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances" | "messages" | "reviews" | "tourist-tax") => void; 
+  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax") => void; 
 }) => {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const [financesOpen, setFinancesOpen] = useState(currentPage.startsWith("finances"));
 
   const menuItems = [
     { id: "dashboard" as const, title: "Dashboard", icon: Home },
     { id: "reservations" as const, title: "Reservas", icon: BookOpen },
     { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
     { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
-    { id: "finances" as const, title: "Finanças", icon: Banknote },
     { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
     { id: "reviews" as const, title: "Reviews", icon: StarIcon },
     { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
+  ];
+
+  const financeItems = [
+    { id: "finances-report" as const, title: "Relatório", icon: PieChartIcon },
+    { id: "finances-expenses" as const, title: "Despesas", icon: Receipt },
   ];
 
   return (
@@ -187,6 +196,49 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Finanças collapsible group */}
+              <SidebarMenuItem>
+                <Collapsible open={financesOpen} onOpenChange={setFinancesOpen}>
+                  <CollapsibleTrigger className="w-full">
+                    <SidebarMenuButton 
+                      className={`w-full ${
+                        currentPage.startsWith("finances") 
+                          ? "bg-primary text-primary-foreground" 
+                          : "hover:bg-accent"
+                      }`}
+                    >
+                      <Banknote className="h-4 w-4" />
+                      {!isCollapsed && (
+                        <>
+                          <span>Finanças</span>
+                          <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${financesOpen ? 'rotate-90' : ''}`} />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {!isCollapsed && (
+                    <CollapsibleContent>
+                      <div className="ml-4 mt-1 space-y-1">
+                        {financeItems.map((item) => (
+                          <SidebarMenuButton
+                            key={item.id}
+                            onClick={() => setCurrentPage(item.id)}
+                            className={`w-full text-sm ${
+                              currentPage === item.id 
+                                ? "bg-primary/20 text-primary" 
+                                : "hover:bg-accent"
+                            }`}
+                          >
+                            <item.icon className="h-3 w-3" />
+                            <span>{item.title}</span>
+                          </SidebarMenuButton>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  )}
+                </Collapsible>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

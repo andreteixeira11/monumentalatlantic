@@ -1,11 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
 import { Euro, TrendingUp, TrendingDown, Calendar, Plus, Receipt, PieChart } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
-import { ExpensesPage } from "./ExpensesPage";
 
 const monthlyFinanceData = [
   { month: "Jan", revenue: 2400, expenses: 800, profit: 1600 },
@@ -39,11 +36,6 @@ const totalStats = {
 };
 
 export const FinancesPage = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-
-  if (activeTab === "expenses") {
-    return <ExpensesPage onBack={() => setActiveTab("overview")} />;
-  }
 
   return (
     <div className="space-y-6">
@@ -55,19 +47,7 @@ export const FinancesPage = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 lg:w-auto">
-          <TabsTrigger value="overview" className="flex items-center space-x-2">
-            <PieChart className="h-4 w-4" />
-            <span>Visão Geral</span>
-          </TabsTrigger>
-          <TabsTrigger value="expenses" className="flex items-center space-x-2">
-            <Receipt className="h-4 w-4" />
-            <span>Despesas</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
+      <div className="space-y-6">
           {/* Current Month Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="shadow-soft">
@@ -360,8 +340,7 @@ export const FinancesPage = () => {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 };
