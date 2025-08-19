@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addDays, differenceInDays } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addDays, isSameDay, startOfWeek, endOfWeek, isSameMonth, isToday } from "date-fns";
 import { pt } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Users, MapPin } from "lucide-react";
 
@@ -82,6 +82,14 @@ const getStatusColor = (status: string) => {
 export const CalendarPage = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
+  const getReservationsForDay = (day: Date) => {
+    return mockCalendarReservations.filter(reservation => {
+      return (day >= reservation.checkIn && day < reservation.checkOut) ||
+             isSameDay(day, reservation.checkIn) ||
+             isSameDay(day, reservation.checkOut);
+    });
+  };
+
   const getReservationsForMonth = (month: Date) => {
     const monthStart = startOfMonth(month);
     const monthEnd = endOfMonth(month);
@@ -103,22 +111,26 @@ export const CalendarPage = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
   };
 
-  // Generate timeline days for the month
-  const getTimelineDays = () => {
+  // Generate calendar days including previous/next month days for complete weeks
+  const getCalendarDays = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
-    return eachDayOfInterval({ start: monthStart, end: monthEnd });
+    const calendarStart = startOfWeek(monthStart, { locale: pt });
+    const calendarEnd = endOfWeek(monthEnd, { locale: pt });
+    
+    return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   };
 
-  const timelineDays = getTimelineDays();
+  const calendarDays = getCalendarDays();
+  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Timeline de Reservas</h1>
-          <p className="text-muted-foreground">Visualize as suas reservas em timeline</p>
+          <h1 className="text-3xl font-bold">Calendário de Reservas</h1>
+          <p className="text-muted-foreground">Visualize as suas reservas em calendário</p>
         </div>
       </div>
 
@@ -144,71 +156,83 @@ export const CalendarPage = () => {
         </CardHeader>
       </Card>
 
-      {/* Timeline View */}
+      {/* Calendar View */}
       <Card className="shadow-soft">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <CalendarIcon className="h-5 w-5" />
-            <span>Timeline do Mês</span>
+            <span>Calendário do Mês</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            {/* Timeline Header */}
-            <div className="flex min-w-max mb-4">
-              {timelineDays.map((day, index) => (
-                <div key={index} className="flex-shrink-0 w-12 text-center">
-                  <div className="text-xs font-medium text-muted-foreground mb-1">
-                    {format(day, "EEE", { locale: pt })}
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {/* Week Days Header */}
+            {weekDays.map((day) => (
+              <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground bg-muted/30 rounded">
+                {day}
+              </div>
+            ))}
+            
+            {/* Calendar Days */}
+            {calendarDays.map((day, index) => {
+              const dayReservations = getReservationsForDay(day);
+              const isCurrentMonth = isSameMonth(day, currentMonth);
+              const isCurrentDay = isToday(day);
+              
+              return (
+                <div
+                  key={index}
+                  className={`min-h-[120px] p-2 border border-border/50 rounded-lg ${
+                    isCurrentMonth ? 'bg-card' : 'bg-muted/20'
+                  } ${isCurrentDay ? 'ring-2 ring-primary' : ''}`}
+                >
+                  {/* Day Number */}
+                  <div className={`text-sm font-medium mb-2 ${
+                    isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'
+                  } ${isCurrentDay ? 'text-primary font-bold' : ''}`}>
+                    {format(day, 'd')}
                   </div>
-                  <div className="text-sm font-semibold">
-                    {format(day, "dd")}
+                  
+                  {/* Reservations for this day */}
+                  <div className="space-y-1">
+                    {dayReservations.slice(0, 3).map((reservation) => {
+                      const isCheckIn = isSameDay(day, reservation.checkIn);
+                      const isCheckOut = isSameDay(day, reservation.checkOut);
+                      
+                      return (
+                        <div
+                          key={reservation.id}
+                          className={`text-xs p-1 rounded text-center truncate ${getStatusColor(reservation.status)} 
+                            ${isCheckIn ? 'border-l-4 border-l-foreground' : ''} 
+                            ${isCheckOut ? 'border-r-4 border-r-foreground' : ''}`}
+                          title={`${reservation.guestName} - ${reservation.property} (${reservation.guests} hóspedes)`}
+                        >
+                          {isCheckIn && '→ '}
+                          {reservation.guestName}
+                          {isCheckOut && ' ←'}
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Show "+X more" if there are more reservations */}
+                    {dayReservations.length > 3 && (
+                      <div className="text-xs text-muted-foreground text-center">
+                        +{dayReservations.length - 3} mais
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Reservations Timeline */}
-            <div className="space-y-3">
-              {monthReservations.map((reservation) => {
-                const startDay = Math.max(0, differenceInDays(reservation.checkIn, startOfMonth(currentMonth)));
-                const duration = differenceInDays(reservation.checkOut, reservation.checkIn);
-                const width = Math.min(duration * 48, (timelineDays.length - startDay) * 48);
-                
-                return (
-                  <div key={reservation.id} className="relative flex items-center min-w-max">
-                    {/* Property Name */}
-                    <div className="w-48 pr-4 text-sm font-medium truncate">
-                      {reservation.property}
-                    </div>
-                    
-                    {/* Timeline Bar */}
-                    <div className="flex-1 relative h-8 flex items-center">
-                      <div 
-                        className={`absolute h-6 rounded-md flex items-center px-2 text-xs font-medium shadow-sm ${getStatusColor(reservation.status)} border`}
-                        style={{
-                          left: `${startDay * 48}px`,
-                          width: `${width}px`,
-                          minWidth: '100px'
-                        }}
-                      >
-                        <span className="truncate">
-                          {reservation.guestName} ({reservation.guests} hóspedes)
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {monthReservations.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Não há reservas para este mês</p>
-              </div>
-            )}
+              );
+            })}
           </div>
+
+          {monthReservations.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Não há reservas para este mês</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -234,6 +258,10 @@ export const CalendarPage = () => {
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 rounded bg-destructive/20 border border-destructive/30"></div>
               <span className="text-sm">Cancelada</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm">→ Check-in</span>
+              <span className="text-sm">← Check-out</span>
             </div>
           </div>
         </CardContent>
