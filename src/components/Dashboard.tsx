@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon } from "lucide-react";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon, Settings } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ReservationsPage } from "./ReservationsPage";
@@ -14,6 +14,7 @@ import { MessagesPage } from "./MessagesPage";
 import { ReviewsPage } from "./ReviewsPage";
 import { TouristTaxPage } from "./TouristTaxPage";
 import { ExpensesPage } from "./ExpensesPage";
+import { ConfigurationsPage } from "./ConfigurationsPage";
 import { ProfileEditModal } from "./ProfileEditModal";
 import logoImage from "@/assets/logo.png";
 
@@ -47,7 +48,7 @@ const propertyTypeData = [
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState<
-    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax"
+    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations"
   >("dashboard");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -80,6 +81,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <ReviewsPage />;
       case "tourist-tax":
         return <TouristTaxPage />;
+      case "configurations":
+        return <ConfigurationsPage />;
       default:
         return <DashboardContent />;
     }
@@ -139,8 +142,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 };
 
 const AppSidebar = ({ currentPage, setCurrentPage }: { 
-  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax"; 
-  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax") => void; 
+  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations") => void; 
 }) => {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -154,6 +157,7 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
     { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
     { id: "reviews" as const, title: "Reviews", icon: StarIcon },
     { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
+    { id: "configurations" as const, title: "Configurações", icon: Settings },
   ];
 
   const financeItems = [

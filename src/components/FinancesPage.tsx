@@ -543,60 +543,74 @@ export const FinancesPage = () => {
 
           {/* Monthly Overview Table */}
           <Card className="shadow-soft bg-gradient-to-br from-card to-card/50 border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-xl">Resumo Mensal Detalhado</CardTitle>
-              <CardDescription>
-                Overview completo das receitas, despesas e valores líquidos por mês
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Resumo Mensal Detalhado</CardTitle>
+                <CardDescription>
+                  Overview completo das receitas, despesas e valores líquidos por mês
+                </CardDescription>
+              </div>
+              <Button onClick={generatePDF} className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Download PDF
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-muted">
-                      <TableHead className="w-[100px] font-semibold">Mês</TableHead>
-                      <TableHead className="text-right font-semibold">Estadia</TableHead>
-                      <TableHead className="text-right font-semibold">Taxa Limpeza</TableHead>
-                      <TableHead className="text-right font-semibold">Total Faturado</TableHead>
-                      <TableHead className="text-right font-semibold">Comissão Booking</TableHead>
-                      <TableHead className="text-right font-semibold">Limpeza (Jack)</TableHead>
-                      <TableHead className="text-right font-semibold">Consumíveis</TableHead>
-                      <TableHead className="text-right font-semibold">Comissão Gestão</TableHead>
-                      <TableHead className="text-right font-semibold">Despesas Gerais</TableHead>
-                      <TableHead className="text-right font-semibold">Autoliq. IVA</TableHead>
-                      <TableHead className="text-right font-semibold">Água</TableHead>
-                      <TableHead className="text-right font-semibold">Luz</TableHead>
-                      <TableHead className="text-right font-semibold">Internet</TableHead>
-                      <TableHead className="text-right font-semibold">Brindes</TableHead>
-                      <TableHead className="text-right font-semibold">Antes Imposto</TableHead>
-                      <TableHead className="text-right font-semibold">IRS (10%)</TableHead>
-                      <TableHead className="text-right font-semibold text-primary">Valor Líquido</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthlyOverviewData.map((data, index) => (
-                      <TableRow key={index} className="border-muted hover:bg-muted/50">
-                        <TableCell className="font-medium">{data.month}</TableCell>
-                        <TableCell className="text-right text-success">€{data.estadia.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">€{data.taxaLimpeza.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-semibold text-success">€{data.valorTotalFaturado.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.comissaoBooking.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.limpezaJack.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.consumiveisJack.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.comissaoGestao.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.despesasGerais.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.autoliquidacaoIVA.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">-€{data.agua.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">-€{data.luz.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">-€{data.internet.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">-€{data.brindesHospedes.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-medium">€{data.valorAntesImposto.toLocaleString()}</TableCell>
-                        <TableCell className="text-right text-destructive">-€{data.irs.toLocaleString()}</TableCell>
-                        <TableCell className="text-right font-bold text-primary text-lg">€{data.valorLiquido.toLocaleString()}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <div className="relative">
+                <div className="overflow-x-auto max-w-full">
+                  <div className="min-w-[1600px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-muted">
+                          <TableHead className="sticky left-0 z-10 bg-background border-r border-muted w-[100px] font-semibold shadow-md">
+                            Mês
+                          </TableHead>
+                          <TableHead className="text-right font-semibold min-w-[120px]">Estadia</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[120px]">Taxa Limpeza</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[120px]">Total Faturado</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[130px]">Comissão Booking</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[120px]">Limpeza (Jack)</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[120px]">Consumíveis</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[130px]">Comissão Gestão</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[130px]">Despesas Gerais</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[120px]">Autoliq. IVA</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[100px]">Água</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[100px]">Luz</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[100px]">Internet</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[100px]">Brindes</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[130px]">Antes Imposto</TableHead>
+                          <TableHead className="text-right font-semibold min-w-[100px]">IRS (10%)</TableHead>
+                          <TableHead className="text-right font-semibold text-primary min-w-[130px]">Valor Líquido</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {monthlyOverviewData.map((data, index) => (
+                          <TableRow key={index} className="border-muted hover:bg-muted/50">
+                            <TableCell className="sticky left-0 z-10 bg-background border-r border-muted font-medium shadow-md">
+                              {data.month}
+                            </TableCell>
+                            <TableCell className="text-right text-success">€{data.estadia.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">€{data.taxaLimpeza.toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-semibold text-success">€{data.valorTotalFaturado.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.comissaoBooking.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.limpezaJack.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.consumiveisJack.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.comissaoGestao.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.despesasGerais.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.autoliquidacaoIVA.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-muted-foreground">-€{data.agua.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-muted-foreground">-€{data.luz.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-muted-foreground">-€{data.internet.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-muted-foreground">-€{data.brindesHospedes.toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-medium">€{data.valorAntesImposto.toLocaleString()}</TableCell>
+                            <TableCell className="text-right text-destructive">-€{data.irs.toLocaleString()}</TableCell>
+                            <TableCell className="text-right font-bold text-primary text-lg">€{data.valorLiquido.toLocaleString()}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
