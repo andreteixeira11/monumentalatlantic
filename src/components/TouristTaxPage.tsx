@@ -1,11 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { Building, Euro, Calendar, Send, Settings, FileText, Download } from "lucide-react";
+import { Building, Euro, Calendar, Send, FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface TouristTaxEntry {
@@ -63,29 +60,8 @@ const mockTaxEntries: TouristTaxEntry[] = [
   }
 ];
 
-const municipalities = [
-  { name: "Porto", taxRate: 2.0 },
-  { name: "Vila Nova de Gaia", taxRate: 1.5 },
-  { name: "Matosinhos", taxRate: 1.0 },
-  { name: "Maia", taxRate: 1.0 },
-  { name: "Gondomar", taxRate: 0.5 }
-];
-
-interface MunicipalityConfig {
-  municipality: string;
-  apiEndpoint: string;
-  accessKey: string;
-  establishmentCode: string;
-}
-
 export const TouristTaxPage = () => {
   const [taxEntries] = useState<TouristTaxEntry[]>(mockTaxEntries);
-  const [municipalityConfig, setMunicipalityConfig] = useState<MunicipalityConfig>({
-    municipality: "",
-    apiEndpoint: "",
-    accessKey: "",
-    establishmentCode: ""
-  });
   const [isConfigured, setIsConfigured] = useState(false);
   const { toast } = useToast();
 
@@ -102,28 +78,11 @@ export const TouristTaxPage = () => {
     }
   };
 
-  const handleSaveConfig = () => {
-    if (!municipalityConfig.municipality || !municipalityConfig.apiEndpoint || !municipalityConfig.accessKey || !municipalityConfig.establishmentCode) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos de configuração.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsConfigured(true);
-    toast({
-      title: "Configuração Guardada",
-      description: "A configuração da Taxa Turística foi guardada com sucesso.",
-    });
-  };
-
   const handleSubmitTax = (entryId: string) => {
     if (!isConfigured) {
       toast({
         title: "Erro",
-        description: "Configure primeiro a integração com a câmara municipal.",
+        description: "Configure primeiro a integração com a câmara municipal em Configurações.",
         variant: "destructive",
       });
       return;
@@ -210,83 +169,6 @@ export const TouristTaxPage = () => {
         </Card>
       </div>
 
-      {/* Municipality Configuration */}
-      <Card className="shadow-soft">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Settings className="h-5 w-5" />
-            <span>Configuração da Câmara Municipal</span>
-          </CardTitle>
-          <CardDescription>
-            Configure a integração com o sistema da câmara municipal
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="municipality">Município</Label>
-              <Select
-                value={municipalityConfig.municipality}
-                onValueChange={(value) => setMunicipalityConfig({ ...municipalityConfig, municipality: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o município" />
-                </SelectTrigger>
-                <SelectContent>
-                  {municipalities.map((municipality) => (
-                    <SelectItem key={municipality.name} value={municipality.name}>
-                      {municipality.name} (€{municipality.taxRate}/noite)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="apiEndpoint">Endpoint da API</Label>
-              <Input
-                id="apiEndpoint"
-                placeholder="https://api.municipio.pt/taxa-turistica"
-                value={municipalityConfig.apiEndpoint}
-                onChange={(e) => setMunicipalityConfig({ ...municipalityConfig, apiEndpoint: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="accessKey">Chave de Acesso</Label>
-              <Input
-                id="accessKey"
-                type="password"
-                placeholder="Chave fornecida pela câmara municipal"
-                value={municipalityConfig.accessKey}
-                onChange={(e) => setMunicipalityConfig({ ...municipalityConfig, accessKey: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="establishmentCode">Código do Estabelecimento</Label>
-              <Input
-                id="establishmentCode"
-                placeholder="Código do seu estabelecimento"
-                value={municipalityConfig.establishmentCode}
-                onChange={(e) => setMunicipalityConfig({ ...municipalityConfig, establishmentCode: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Button onClick={handleSaveConfig}>
-              Guardar Configuração
-            </Button>
-            {isConfigured && (
-              <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
-                Configurado
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Tax Entries */}
       <Card className="shadow-soft">
         <CardHeader>
@@ -295,7 +177,7 @@ export const TouristTaxPage = () => {
             <span>Entradas de Taxa Turística</span>
           </CardTitle>
           <CardDescription>
-            Lista de taxas a submeter à câmara municipal
+            Configure primeiro a Taxa Turística nas Configurações para poder submeter as taxas.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -368,7 +250,7 @@ export const TouristTaxPage = () => {
           {!isConfigured && (
             <div className="mt-6 p-4 bg-warning/10 border border-warning/20 rounded-lg">
               <p className="text-sm text-warning">
-                ⚠️ Configure primeiro a integração com a câmara municipal para poder submeter as taxas.
+                ⚠️ Configure primeiro a integração com a câmara municipal em Configurações para poder submeter as taxas.
               </p>
             </div>
           )}

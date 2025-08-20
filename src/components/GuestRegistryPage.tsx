@@ -1,17 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { Settings, Key, Building, Hash, Send, CheckCircle, XCircle, Link, Copy } from "lucide-react";
+import { Send, CheckCircle, XCircle, Link, Copy, Users, Clock, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface SibaConfig {
-  accessKey: string;
-  accommodationName: string;
-  establishmentNumber: string;
-}
 
 interface GuestRegistry {
   id: string;
@@ -75,11 +68,6 @@ const mockGuestRegistries: GuestRegistry[] = [
 ];
 
 export const GuestRegistryPage = () => {
-  const [sibaConfig, setSibaConfig] = useState<SibaConfig>({
-    accessKey: "",
-    accommodationName: "",
-    establishmentNumber: ""
-  });
   const [isConfigured, setIsConfigured] = useState(false);
   const [registries] = useState<GuestRegistry[]>(mockGuestRegistries);
   const { toast } = useToast();
@@ -116,24 +104,16 @@ export const GuestRegistryPage = () => {
     }
   };
 
-  const handleSaveConfig = () => {
-    if (!sibaConfig.accessKey || !sibaConfig.accommodationName || !sibaConfig.establishmentNumber) {
+  const handleSendToSiba = (registryId: string) => {
+    if (!isConfigured) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos de configuração.",
+        description: "Configure primeiro o SIBA nas Configurações.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsConfigured(true);
-    toast({
-      title: "Configuração Guardada",
-      description: "A configuração do SIBA foi guardada com sucesso.",
-    });
-  };
-
-  const handleSendToSiba = (registryId: string) => {
     toast({
       title: "Enviado para SIBA",
       description: "O registo foi enviado para o SIBA com sucesso.",
@@ -175,83 +155,57 @@ export const GuestRegistryPage = () => {
         </div>
       </div>
 
-      {/* SIBA Configuration */}
-      <Card className="shadow-soft">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Settings className="h-5 w-5" />
-            <span>Configuração SIBA</span>
-          </CardTitle>
-          <CardDescription>
-            Configure os dados de acesso ao webservice do SIBA
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="accessKey" className="flex items-center space-x-2">
-                <Key className="h-4 w-4" />
-                <span>Chave de Acesso (SIBA)</span>
-              </Label>
-              <Input
-                id="accessKey"
-                type="password"
-                placeholder="Insira a chave de ativação"
-                value={sibaConfig.accessKey}
-                onChange={(e) => setSibaConfig({ ...sibaConfig, accessKey: e.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Chave de ativação recebida após o registo no SIBA
-              </p>
-            </div>
+      {/* Registry Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card className="shadow-soft">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total de Hóspedes
+            </CardTitle>
+            <Users className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{registries.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Registos de hóspedes
+            </p>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="accommodationName" className="flex items-center space-x-2">
-                <Building className="h-4 w-4" />
-                <span>Nome Abreviado do Alojamento</span>
-              </Label>
-              <Input
-                id="accommodationName"
-                placeholder="Máximo 15 caracteres"
-                maxLength={15}
-                value={sibaConfig.accommodationName}
-                onChange={(e) => setSibaConfig({ ...sibaConfig, accommodationName: e.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Abreviação do nome do alojamento (máx. 15 caracteres)
-              </p>
+        <Card className="shadow-soft">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Enviados para SIBA
+            </CardTitle>
+            <CheckCircle className="h-4 w-4 text-success" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {registries.filter(entry => entry.status === "sent").length}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Registos enviados
+            </p>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="establishmentNumber" className="flex items-center space-x-2">
-                <Hash className="h-4 w-4" />
-                <span>Número do Estabelecimento</span>
-              </Label>
-              <Input
-                id="establishmentNumber"
-                placeholder="Número fornecido pelo SIBA"
-                value={sibaConfig.establishmentNumber}
-                onChange={(e) => setSibaConfig({ ...sibaConfig, establishmentNumber: e.target.value })}
-              />
-              <p className="text-xs text-muted-foreground">
-                Número fornecido pelo SIBA após o registo
-              </p>
+        <Card className="shadow-soft">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Pendentes
+            </CardTitle>
+            <Clock className="h-4 w-4 text-warning" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {registries.filter(entry => entry.status === "pending").length}
             </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Button onClick={handleSaveConfig}>
-              Guardar Configuração
-            </Button>
-            {isConfigured && (
-              <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Configurado
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            <p className="text-xs text-muted-foreground mt-1">
+              Aguardam envio
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Guest Form Link Generation */}
       <Card className="shadow-soft">
@@ -394,7 +348,7 @@ export const GuestRegistryPage = () => {
           {!isConfigured && (
             <div className="mt-6 p-4 bg-warning/10 border border-warning/20 rounded-lg">
               <p className="text-sm text-warning">
-                ⚠️ Configure primeiro os dados de acesso ao SIBA para poder enviar os registos.
+                ⚠️ Configure primeiro os dados de acesso ao SIBA em Configurações para poder enviar os registos.
               </p>
             </div>
           )}
