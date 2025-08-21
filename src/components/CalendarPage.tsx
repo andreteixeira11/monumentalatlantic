@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addDays, isSameDay, startOfWeek, endOfWeek, isSameMonth, isToday } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addDays, isSameDay, startOfWeek, endOfWeek, isSameMonth, isToday, differenceInDays } from "date-fns";
 import { pt } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Users, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Users, MapPin, Eye, Phone, Mail, CreditCard, Info } from "lucide-react";
 
 interface CalendarReservation {
   id: string;
@@ -14,6 +15,11 @@ interface CalendarReservation {
   checkOut: Date;
   guests: number;
   status: "confirmed" | "pending" | "cancelled" | "completed";
+  email?: string;
+  phone?: string;
+  totalAmount?: number;
+  platform?: string;
+  notes?: string;
 }
 
 const mockCalendarReservations: CalendarReservation[] = [
@@ -24,7 +30,12 @@ const mockCalendarReservations: CalendarReservation[] = [
     checkIn: new Date(2024, 11, 15),
     checkOut: new Date(2024, 11, 18),
     guests: 2,
-    status: "confirmed"
+    status: "confirmed",
+    email: "maria.silva@email.com",
+    phone: "+351 910 123 456",
+    totalAmount: 240,
+    platform: "Booking.com",
+    notes: "Chegada após as 18h"
   },
   {
     id: "RES-002", 
@@ -33,7 +44,12 @@ const mockCalendarReservations: CalendarReservation[] = [
     checkIn: new Date(2024, 11, 20),
     checkOut: new Date(2024, 11, 25),
     guests: 4,
-    status: "confirmed"
+    status: "confirmed",
+    email: "joao.santos@email.com",
+    phone: "+351 920 234 567",
+    totalAmount: 450,
+    platform: "Airbnb",
+    notes: "Família com crianças"
   },
   {
     id: "RES-003",
@@ -42,7 +58,12 @@ const mockCalendarReservations: CalendarReservation[] = [
     checkIn: new Date(2024, 11, 10),
     checkOut: new Date(2024, 11, 13),
     guests: 1,
-    status: "completed"
+    status: "completed",
+    email: "ana.costa@email.com",
+    phone: "+351 930 345 678",
+    totalAmount: 180,
+    platform: "Booking.com",
+    notes: "Viagem de negócios"
   },
   {
     id: "RES-004",
@@ -51,7 +72,12 @@ const mockCalendarReservations: CalendarReservation[] = [
     checkIn: new Date(2025, 0, 5),
     checkOut: new Date(2025, 0, 8),
     guests: 3,
-    status: "pending"
+    status: "pending",
+    email: "pedro.oliveira@email.com",
+    phone: "+351 940 456 789",
+    totalAmount: 300,
+    platform: "Airbnb",
+    notes: "Aguarda confirmação de pagamento"
   },
   {
     id: "RES-005",
@@ -60,9 +86,21 @@ const mockCalendarReservations: CalendarReservation[] = [
     checkIn: new Date(2024, 11, 28),
     checkOut: new Date(2025, 0, 2),
     guests: 6,
-    status: "confirmed"
+    status: "confirmed",
+    email: "carla.fernandes@email.com",
+    phone: "+351 950 567 890",
+    totalAmount: 600,
+    platform: "Booking.com",
+    notes: "Celebração de Ano Novo"
   }
 ];
+
+// Cores para diferentes propriedades
+const propertyColors: Record<string, string> = {
+  "Apartamento Centro Porto": "bg-blue-500/20 text-blue-700 border-blue-500/30",
+  "Casa Vila Nova de Gaia": "bg-green-500/20 text-green-700 border-green-500/30",
+  "Loft Ribeira": "bg-purple-500/20 text-purple-700 border-purple-500/30",
+};
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -81,6 +119,13 @@ const getStatusColor = (status: string) => {
 
 export const CalendarPage = () => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [selectedReservation, setSelectedReservation] = useState<CalendarReservation | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleReservationClick = (reservation: CalendarReservation) => {
+    setSelectedReservation(reservation);
+    setIsModalOpen(true);
+  };
 
   const getReservationsForDay = (day: Date) => {
     return mockCalendarReservations.filter(reservation => {
@@ -203,10 +248,12 @@ export const CalendarPage = () => {
                       return (
                         <div
                           key={reservation.id}
-                          className={`text-xs p-1 rounded text-center truncate ${getStatusColor(reservation.status)} 
+                          className={`text-xs p-1 rounded text-center truncate cursor-pointer hover:opacity-75 transition-opacity
+                            ${propertyColors[reservation.property] || getStatusColor(reservation.status)} 
                             ${isCheckIn ? 'border-l-4 border-l-foreground' : ''} 
                             ${isCheckOut ? 'border-r-4 border-r-foreground' : ''}`}
-                          title={`${reservation.guestName} - ${reservation.property} (${reservation.guests} hóspedes)`}
+                          title={`${reservation.guestName} - ${reservation.property} (${reservation.guests} hóspedes) - Clique para detalhes`}
+                          onClick={() => handleReservationClick(reservation)}
                         >
                           {isCheckIn && '→ '}
                           {reservation.guestName}
@@ -236,36 +283,208 @@ export const CalendarPage = () => {
         </CardContent>
       </Card>
 
-      {/* Legend */}
-      <Card className="shadow-soft">
-        <CardHeader>
-          <CardTitle className="text-lg">Legenda</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded bg-success/20 border border-success/30"></div>
-              <span className="text-sm">Confirmada</span>
+        {/* Legend */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="text-lg">Estados das Reservas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded bg-success/20 border border-success/30"></div>
+                <span className="text-sm">Confirmada</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded bg-warning/20 border border-warning/30"></div>
+                <span className="text-sm">Pendente</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded bg-muted/50 border border-muted/30"></div>
+                <span className="text-sm">Concluída</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded bg-destructive/20 border border-destructive/30"></div>
+                <span className="text-sm">Cancelada</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm">→ Check-in</span>
+                <span className="text-sm">← Check-out</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded bg-warning/20 border border-warning/30"></div>
-              <span className="text-sm">Pendente</span>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="text-lg">Propriedades</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {Object.entries(propertyColors).map(([property, colorClass]) => (
+                <div key={property} className="flex items-center space-x-2">
+                  <div className={`w-4 h-4 rounded ${colorClass}`}></div>
+                  <span className="text-sm">{property}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded bg-muted/50 border border-muted/30"></div>
-              <span className="text-sm">Concluída</span>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Reservation Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Eye className="h-5 w-5" />
+              <span>Detalhes da Reserva</span>
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas sobre a reserva selecionada
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedReservation && (
+            <div className="space-y-6">
+              {/* Header Card */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold">{selectedReservation.guestName}</h3>
+                      <p className="text-muted-foreground">{selectedReservation.id}</p>
+                    </div>
+                    <Badge className={getStatusColor(selectedReservation.status)}>
+                      {selectedReservation.status === "confirmed" && "Confirmada"}
+                      {selectedReservation.status === "pending" && "Pendente"}
+                      {selectedReservation.status === "cancelled" && "Cancelada"}
+                      {selectedReservation.status === "completed" && "Concluída"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Property & Dates */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Propriedade</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-6">
+                        {selectedReservation.property}
+                      </p>
+                      
+                      <div className="flex items-center space-x-2">
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Datas</span>
+                      </div>
+                      <div className="ml-6 text-sm space-y-1">
+                        <p><span className="text-muted-foreground">Check-in:</span> {format(selectedReservation.checkIn, "dd/MM/yyyy", { locale: pt })}</p>
+                        <p><span className="text-muted-foreground">Check-out:</span> {format(selectedReservation.checkOut, "dd/MM/yyyy", { locale: pt })}</p>
+                        <p><span className="text-muted-foreground">Duração:</span> {differenceInDays(selectedReservation.checkOut, selectedReservation.checkIn)} noites</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Contact & Booking Info */}
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Hóspedes</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-6">
+                        {selectedReservation.guests} {selectedReservation.guests === 1 ? 'pessoa' : 'pessoas'}
+                      </p>
+
+                      {selectedReservation.email && (
+                        <>
+                          <div className="flex items-center space-x-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Email</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground ml-6 break-all">
+                            {selectedReservation.email}
+                          </p>
+                        </>
+                      )}
+
+                      {selectedReservation.phone && (
+                        <>
+                          <div className="flex items-center space-x-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Telefone</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground ml-6">
+                            {selectedReservation.phone}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Financial Info */}
+                {selectedReservation.totalAmount && (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <CreditCard className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Informação Financeira</span>
+                        </div>
+                        <div className="ml-6 text-sm space-y-1">
+                          <p><span className="text-muted-foreground">Valor Total:</span> €{selectedReservation.totalAmount}</p>
+                          {selectedReservation.platform && (
+                            <p><span className="text-muted-foreground">Plataforma:</span> {selectedReservation.platform}</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Notes */}
+                {selectedReservation.notes && (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Observações</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground ml-6">
+                          {selectedReservation.notes}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                  Fechar
+                </Button>
+                <Button onClick={() => {
+                  // Add edit functionality here
+                  setIsModalOpen(false);
+                }}>
+                  Editar Reserva
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded bg-destructive/20 border border-destructive/30"></div>
-              <span className="text-sm">Cancelada</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">→ Check-in</span>
-              <span className="text-sm">← Check-out</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
