@@ -12,6 +12,7 @@ interface Document {
   name: string;
   type: string;
   category: string;
+  propertyName: string;
   uploadDate: string;
   expiryDate?: string;
   size: string;
@@ -24,6 +25,7 @@ const mockDocuments: Document[] = [
     name: "RNAL_Certificado.pdf",
     type: "PDF",
     category: "RNAL",
+    propertyName: "Apartamento Centro Porto",
     uploadDate: "2024-01-15",
     expiryDate: "2025-01-15",
     size: "2.3 MB",
@@ -34,6 +36,7 @@ const mockDocuments: Document[] = [
     name: "Seguro_Responsabilidade_Civil.pdf",
     type: "PDF",
     category: "Seguro",
+    propertyName: "Casa Vila Nova de Gaia",
     uploadDate: "2024-02-01",
     expiryDate: "2024-12-31",
     size: "1.8 MB",
@@ -44,6 +47,7 @@ const mockDocuments: Document[] = [
     name: "Modelo21_RFI_2023.pdf",
     type: "PDF",
     category: "Fiscal",
+    propertyName: "Loft Ribeira",
     uploadDate: "2024-03-10",
     size: "956 KB",
     status: "active"
@@ -53,6 +57,7 @@ const mockDocuments: Document[] = [
     name: "Certificado_Residencia_Fiscal.pdf",
     type: "PDF",
     category: "Fiscal",
+    propertyName: "Apartamento Centro Porto",
     uploadDate: "2023-11-20",
     expiryDate: "2024-11-20",
     size: "1.2 MB",
@@ -309,28 +314,29 @@ export const DocumentManagementPage = () => {
                 >
                   <div className="flex items-start space-x-3">
                     <FileText className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium truncate">{doc.name}</h3>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${getCategoryColor(doc.category)}`}
-                        >
-                          {doc.category}
-                        </Badge>
-                        {getStatusBadge(doc.status)}
-                        <span className="text-xs text-muted-foreground">{doc.size}</span>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium truncate">{doc.name}</h3>
+                        <p className="text-sm text-muted-foreground">{doc.propertyName}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${getCategoryColor(doc.category)}`}
+                          >
+                            {doc.category}
+                          </Badge>
+                          {getStatusBadge(doc.status)}
+                          <span className="text-xs text-muted-foreground">{doc.size}</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-xs text-muted-foreground">
+                          <span>Carregado: {new Date(doc.uploadDate).toLocaleDateString('pt-PT')}</span>
+                          {doc.expiryDate && (
+                            <span className="flex items-center">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              Expira: {new Date(doc.expiryDate).toLocaleDateString('pt-PT')}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>Carregado: {new Date(doc.uploadDate).toLocaleDateString('pt-PT')}</span>
-                        {doc.expiryDate && (
-                          <span className="flex items-center">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            Expira: {new Date(doc.expiryDate).toLocaleDateString('pt-PT')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
                   </div>
                   
                   <div className="flex items-center space-x-2 lg:ml-4">

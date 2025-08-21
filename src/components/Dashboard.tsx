@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon, Settings, FileText } from "lucide-react";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon, Settings, FileText, CreditCard, UsersIcon, FileTextIcon, Lock } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ReservationsPage } from "./ReservationsPage";
@@ -16,6 +16,10 @@ import { TouristTaxPage } from "./TouristTaxPage";
 import { ExpensesPage } from "./ExpensesPage";
 import { ConfigurationsPage } from "./ConfigurationsPage";
 import { DocumentManagementPage } from "./DocumentManagementPage";
+import { BillingPage } from "./BillingPage";
+import { StaffManagementPage } from "./StaffManagementPage";
+import { TemplatesPage } from "./TemplatesPage";
+import { SmartLockPage } from "./SmartLockPage";
 import { ProfileEditModal } from "./ProfileEditModal";
 import logoImage from "@/assets/logo.png";
 
@@ -49,7 +53,7 @@ const propertyTypeData = [
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState<
-    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents"
+    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock"
   >("dashboard");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -86,6 +90,14 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <ConfigurationsPage />;
       case "documents":
         return <DocumentManagementPage />;
+      case "billing":
+        return <BillingPage />;
+      case "staff":
+        return <StaffManagementPage />;
+      case "templates":
+        return <TemplatesPage />;
+      case "smart-lock":
+        return <SmartLockPage />;
       default:
         return <DashboardContent />;
     }
@@ -153,8 +165,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 };
 
 const AppSidebar = ({ currentPage, setCurrentPage }: { 
-  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents"; 
-  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents") => void; 
+  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock") => void;
 }) => {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -166,6 +178,10 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
     { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
     { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
     { id: "documents" as const, title: "Gestão Documental", icon: FileText },
+    { id: "billing" as const, title: "Faturação", icon: CreditCard },
+    { id: "staff" as const, title: "Gestão de Staff", icon: UsersIcon },
+    { id: "templates" as const, title: "Templates", icon: FileTextIcon },
+    { id: "smart-lock" as const, title: "Smart Hub Lock", icon: Lock },
     { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
     { id: "reviews" as const, title: "Reviews", icon: StarIcon },
     { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
