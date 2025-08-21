@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon, Settings } from "lucide-react";
+import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon, Settings, FileText } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ReservationsPage } from "./ReservationsPage";
@@ -15,6 +15,7 @@ import { ReviewsPage } from "./ReviewsPage";
 import { TouristTaxPage } from "./TouristTaxPage";
 import { ExpensesPage } from "./ExpensesPage";
 import { ConfigurationsPage } from "./ConfigurationsPage";
+import { DocumentManagementPage } from "./DocumentManagementPage";
 import { ProfileEditModal } from "./ProfileEditModal";
 import logoImage from "@/assets/logo.png";
 
@@ -48,7 +49,7 @@ const propertyTypeData = [
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState<
-    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations"
+    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents"
   >("dashboard");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -83,6 +84,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <TouristTaxPage />;
       case "configurations":
         return <ConfigurationsPage />;
+      case "documents":
+        return <DocumentManagementPage />;
       default:
         return <DashboardContent />;
     }
@@ -93,24 +96,32 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
       <div className="min-h-screen flex w-full">
         <AppSidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
           <header className="bg-gradient-primary shadow-soft">
-            <div className="px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <SidebarTrigger className="text-white hover:bg-white/20" />
-                <h1 className="text-2xl font-bold text-white">Portal Alojamento</h1>
+            <div className="px-4 lg:px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3 min-w-0">
+                <SidebarTrigger className="text-white hover:bg-white/20 flex-shrink-0" />
+                <h1 className="text-lg lg:text-2xl font-bold text-white truncate">Portal Alojamento</h1>
               </div>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 lg:space-x-4">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsProfileModalOpen(true)}
-                  className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+                  className="bg-white/10 text-white border-white/30 hover:bg-white/20 hidden sm:flex"
                 >
                   <User className="h-4 w-4 mr-2" />
-                  {userProfile.name}
+                  <span className="hidden lg:inline">{userProfile.name}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="bg-white/10 text-white border-white/30 hover:bg-white/20 sm:hidden"
+                >
+                  <User className="h-4 w-4" />
                 </Button>
                 <Button 
                   variant="outline" 
@@ -118,14 +129,14 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
                   onClick={onLogout}
                   className="bg-white/10 text-white border-white/30 hover:bg-white/20"
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sair
+                  <LogOut className="h-4 w-4 lg:mr-2" />
+                  <span className="hidden lg:inline">Sair</span>
                 </Button>
               </div>
             </div>
           </header>
 
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-4 lg:p-6 overflow-auto">
             {renderPage()}
           </main>
         </div>
@@ -142,8 +153,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 };
 
 const AppSidebar = ({ currentPage, setCurrentPage }: { 
-  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations"; 
-  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations") => void; 
+  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents") => void; 
 }) => {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -154,6 +165,7 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
     { id: "reservations" as const, title: "Reservas", icon: BookOpen },
     { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
     { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
+    { id: "documents" as const, title: "Gestão Documental", icon: FileText },
     { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
     { id: "reviews" as const, title: "Reviews", icon: StarIcon },
     { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
@@ -174,10 +186,10 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
             <img 
               src={logoImage} 
               alt="Logo" 
-              className="h-8 w-8 object-contain"
+              className="h-8 w-8 object-contain flex-shrink-0"
             />
             {!isCollapsed && (
-              <span className="text-lg font-semibold">Monumental</span>
+              <span className="text-lg font-semibold truncate">Monumental</span>
             )}
           </div>
         </div>
