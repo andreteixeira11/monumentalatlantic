@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
-import { MessageCircle, Send, Search, Filter, Settings, Reply, User } from "lucide-react";
+import { MessageCircle, Send, Search, Filter, Settings, Reply, User, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -154,124 +154,235 @@ export const MessagesPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Modern Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Mensagens</h1>
-          <p className="text-muted-foreground">Comunicação com hóspedes das plataformas</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-variant bg-clip-text text-transparent">
+            Central de Mensagens
+          </h1>
+          <p className="text-muted-foreground">Chat integrado com todas as plataformas</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="shadow-soft">
           <Settings className="h-4 w-4 mr-2" />
           Configurar Integrações
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card className="shadow-soft">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Procurar mensagens..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      {/* Chat Interface Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[700px]">
+        {/* Chat List Sidebar */}
+        <Card className="shadow-medium border-primary/20 lg:col-span-1">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center space-x-2">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                <span>Conversas</span>
+              </CardTitle>
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                {filteredMessages.length}
+              </Badge>
             </div>
-            <div className="flex gap-2">
+            
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Procurar conversas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-background/50"
+              />
+            </div>
+            
+            {/* Filters */}
+            <div className="flex gap-1">
               <Button
-                variant={statusFilter === "all" ? "default" : "outline"}
+                variant={statusFilter === "all" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setStatusFilter("all")}
+                className="flex-1 text-xs"
               >
                 Todas
               </Button>
               <Button
-                variant={statusFilter === "unread" ? "default" : "outline"}
+                variant={statusFilter === "unread" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setStatusFilter("unread")}
+                className="flex-1 text-xs"
               >
                 Não Lidas
               </Button>
               <Button
-                variant={statusFilter === "replied" ? "default" : "outline"}
+                variant={statusFilter === "replied" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setStatusFilter("replied")}
+                className="flex-1 text-xs"
               >
                 Respondidas
               </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          
+          <CardContent className="p-0 h-full overflow-hidden">
+            <div className="h-full overflow-y-auto custom-scrollbar">
+              {filteredMessages.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhuma conversa encontrada</p>
+                </div>
+              ) : (
+                <div className="space-y-1 p-2">
+                  {filteredMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-accent/50 border-l-4 ${
+                        selectedMessage?.id === message.id 
+                          ? 'bg-primary/10 border-l-primary shadow-soft' 
+                          : message.status === 'unread' 
+                          ? 'border-l-destructive bg-destructive/5'
+                          : 'border-l-transparent'
+                      }`}
+                      onClick={() => setSelectedMessage(message)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs">
+                            {message.guestName.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-sm truncate">{message.guestName}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(message.timestamp).toLocaleTimeString('pt-PT', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 mb-1">
+                            <Badge 
+                              className={`${getPlatformColor(message.platform)} text-xs px-1.5 py-0.5`}
+                              variant="secondary"
+                            >
+                              {message.platform === "booking" ? "B" : "A"}
+                            </Badge>
+                            {message.status === 'unread' && (
+                              <div className="w-2 h-2 bg-destructive rounded-full"></div>
+                            )}
+                          </div>
+                          
+                          <p className="text-xs text-muted-foreground truncate">
+                            {message.lastMessage}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Messages List */}
-      <Card className="shadow-soft">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <MessageCircle className="h-5 w-5" />
-            <span>Mensagens Recentes</span>
-          </CardTitle>
-          <CardDescription>
-            {filteredMessages.length} mensagem(s) encontrada(s)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredMessages.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Não foram encontradas mensagens</p>
-              </div>
-            ) : (
-              filteredMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedMessage(message)}
-                >
-                  <div className="flex items-center space-x-4 flex-1">
+        {/* Chat Messages Area */}
+        <Card className="shadow-medium border-primary/20 lg:col-span-2">
+          {selectedMessage ? (
+            <>
+              {/* Chat Header */}
+              <CardHeader className="bg-gradient-to-r from-card to-card/50 border-b">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
                     <Avatar>
                       <AvatarFallback>
-                        <User className="h-4 w-4" />
+                        {selectedMessage.guestName.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
-                    
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center space-x-3">
-                        <span className="font-semibold">{message.guestName}</span>
-                        <Badge className={getPlatformColor(message.platform)}>
-                          {message.platform === "booking" ? "Booking.com" : "Airbnb"}
+                    <div>
+                      <CardTitle className="text-lg">{selectedMessage.guestName}</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getPlatformColor(selectedMessage.platform)}>
+                          {selectedMessage.platform === "booking" ? "Booking.com" : "Airbnb"}
                         </Badge>
-                        <Badge className={getStatusColor(message.status)}>
-                          {message.status === "unread" && "Não lida"}
-                          {message.status === "read" && "Lida"}
-                          {message.status === "replied" && "Respondida"}
-                        </Badge>
-                      </div>
-                      <div className="text-sm font-medium">{message.subject}</div>
-                      <div className="text-sm text-muted-foreground truncate">
-                        {message.lastMessage}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatTimestamp(message.timestamp)}
+                        <CardDescription>{selectedMessage.subject}</CardDescription>
                       </div>
                     </div>
                   </div>
-                  
-                  <Button variant="outline" size="sm">
-                    <Reply className="h-4 w-4 mr-2" />
-                    Ver
+                  <Button variant="outline" size="sm" onClick={() => setSelectedMessage(null)}>
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              </CardHeader>
+              
+              {/* Messages */}
+              <CardContent className="flex-1 overflow-hidden p-0">
+                <div className="h-[400px] overflow-y-auto custom-scrollbar p-4 space-y-4">
+                  {selectedMessage.conversation.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${msg.sender === "host" ? "justify-end" : "justify-start"} animate-fade-in-up`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <div
+                        className={`max-w-[80%] p-4 rounded-2xl shadow-soft ${
+                          msg.sender === "host"
+                            ? "bg-primary text-primary-foreground rounded-br-sm"
+                            : "bg-muted rounded-bl-sm"
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed">{msg.message}</p>
+                        <p className={`text-xs mt-2 ${
+                          msg.sender === "host" ? "text-primary-foreground/70" : "text-muted-foreground"
+                        }`}>
+                          {formatTimestamp(msg.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Reply Input */}
+                <div className="border-t p-4 bg-gradient-to-r from-background to-muted/20">
+                  <div className="space-y-3">
+                    <Textarea
+                      placeholder="Escreva a sua resposta..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      rows={3}
+                      className="resize-none bg-background/50 border-primary/20 focus:border-primary/40"
+                    />
+                    
+                    <div className="flex justify-between items-center">
+                      <div className="text-xs text-muted-foreground">
+                        {replyText.length}/500 caracteres
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          Template
+                        </Button>
+                        <Button onClick={handleSendReply} className="shadow-soft">
+                          <Send className="h-4 w-4 mr-2" />
+                          Enviar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          ) : (
+            <CardContent className="flex-1 flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                <h3 className="text-lg font-medium mb-2">Selecione uma Conversa</h3>
+                <p className="text-sm">Escolha uma conversa da lista para ver as mensagens</p>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      </div>
 
       {/* Message Detail Dialog */}
       {selectedMessage && (

@@ -2,13 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Modern Design System - Premium Accommodation Management Platform */
 
 @layer base {
   :root {
-    --background: 250 100% 99%;
+    /* Core Colors - Modern & Professional */
+    --background: 250 50% 99%;
     --foreground: 225 25% 15%;
 
     --card: 0 0% 100%;
@@ -17,25 +16,25 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 225 25% 15%;
 
+    /* Primary - Modern Blue Palette */
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 217 91% 70%;
+    --primary-glow: 217 91% 75%;
+    --primary-variant: 217 91% 50%;
 
-    --secondary: 220 30% 96%;
-    --secondary-foreground: 225 25% 15%;
+    /* Secondary - Sophisticated Grays */
+    --secondary: 225 25% 95%;
+    --secondary-foreground: 225 25% 25%;
 
-    --muted: 220 30% 96%;
-    --muted-foreground: 225 15% 50%;
+    --muted: 225 25% 96%;
+    --muted-foreground: 225 15% 45%;
 
-    --accent: 213 100% 97%;
-    --accent-foreground: 217 91% 60%;
+    --accent: 217 91% 95%;
+    --accent-foreground: 217 91% 40%;
 
+    /* Status Colors */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 220 30% 90%;
-    --input: 220 30% 90%;
-    --ring: 217 91% 60%;
 
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
@@ -43,15 +42,31 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(220 30% 96%), hsl(213 100% 97%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(230 91% 65%));
-    
-    --shadow-soft: 0 4px 20px -2px hsl(217 91% 60% / 0.1);
-    --shadow-medium: 0 8px 30px -4px hsl(217 91% 60% / 0.15);
-    --shadow-strong: 0 20px 40px -8px hsl(217 91% 60% / 0.2);
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    /* Interactive Elements */
+    --border: 225 25% 88%;
+    --input: 225 25% 90%;
+    --ring: 217 91% 60%;
+
+    /* Modern Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 75%));
+    --gradient-secondary: linear-gradient(135deg, hsl(225 25% 95%), hsl(217 91% 95%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(230 91% 65%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(225 25% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(217 91% 95%), hsl(225 25% 98%));
+    
+    /* Premium Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(217 91% 60% / 0.08);
+    --shadow-medium: 0 8px 25px -5px hsl(217 91% 60% / 0.12);
+    --shadow-strong: 0 25px 50px -12px hsl(217 91% 60% / 0.25);
+    --shadow-glow: 0 0 0 1px hsl(217 91% 60% / 0.1), 0 2px 8px -2px hsl(217 91% 60% / 0.15);
+
+    /* Modern Border Radius */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -115,6 +130,82 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Premium Component Styles */
+  .card-premium {
+    @apply bg-gradient-to-br from-card to-card/90 shadow-soft border-primary/10;
+  }
+
+  .card-elevated {
+    @apply shadow-medium hover:shadow-strong transition-all duration-300;
+  }
+
+  .btn-modern {
+    @apply shadow-soft hover:shadow-medium active:shadow-soft transition-all duration-200;
+  }
+
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20;
+  }
+
+  /* Smooth Animations */
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-muted/30 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-primary/20 rounded-full hover:bg-primary/30;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

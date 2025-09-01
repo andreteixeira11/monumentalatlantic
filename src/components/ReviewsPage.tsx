@@ -102,14 +102,17 @@ export const ReviewsPage = () => {
     ));
   };
 
+  const [propertyFilter, setPropertyFilter] = useState<string>("all");
+
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = review.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          review.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          review.comment.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRating = ratingFilter === null || review.rating === ratingFilter;
     const matchesPlatform = platformFilter === "all" || review.platform === platformFilter;
+    const matchesProperty = propertyFilter === "all" || review.property === propertyFilter;
     
-    return matchesSearch && matchesRating && matchesPlatform;
+    return matchesSearch && matchesRating && matchesPlatform && matchesProperty;
   });
 
   const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
@@ -128,7 +131,22 @@ export const ReviewsPage = () => {
         <div>
           <h1 className="text-3xl font-bold">Reviews</h1>
           <p className="text-muted-foreground">Avaliações dos hóspedes das suas propriedades</p>
-        </div>
+      <div className="flex items-center space-x-2">
+        <Badge variant="secondary" className="bg-primary/10 text-primary">
+          {filteredReviews.length} reviews encontradas
+        </Badge>
+        <Select value={propertyFilter} onValueChange={setPropertyFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as Propriedades</SelectItem>
+            <SelectItem value="Apartamento Centro Porto">Apartamento Centro Porto</SelectItem>
+            <SelectItem value="Casa Vila Nova de Gaia">Casa Vila Nova de Gaia</SelectItem>
+            <SelectItem value="Loft Ribeira">Loft Ribeira</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       </div>
 
       {/* Stats Cards */}
