@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { Star, Search, Filter, TrendingUp, User, Calendar } from "lucide-react";
 
@@ -131,22 +132,23 @@ export const ReviewsPage = () => {
         <div>
           <h1 className="text-3xl font-bold">Reviews</h1>
           <p className="text-muted-foreground">Avaliações dos hóspedes das suas propriedades</p>
-      <div className="flex items-center space-x-2">
-        <Badge variant="secondary" className="bg-primary/10 text-primary">
-          {filteredReviews.length} reviews encontradas
-        </Badge>
-        <Select value={propertyFilter} onValueChange={setPropertyFilter}>
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as Propriedades</SelectItem>
-            <SelectItem value="Apartamento Centro Porto">Apartamento Centro Porto</SelectItem>
-            <SelectItem value="Casa Vila Nova de Gaia">Casa Vila Nova de Gaia</SelectItem>
-            <SelectItem value="Loft Ribeira">Loft Ribeira</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge variant="secondary" className="bg-primary/10 text-primary">
+            {filteredReviews.length} reviews encontradas
+          </Badge>
+          <Select value={propertyFilter} onValueChange={setPropertyFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as Propriedades</SelectItem>
+              <SelectItem value="Apartamento Centro Porto">Apartamento Centro Porto</SelectItem>
+              <SelectItem value="Casa Vila Nova de Gaia">Casa Vila Nova de Gaia</SelectItem>
+              <SelectItem value="Loft Ribeira">Loft Ribeira</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Stats Cards */}
