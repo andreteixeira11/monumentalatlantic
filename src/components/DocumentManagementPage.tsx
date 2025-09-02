@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, Download, Trash2, Eye, Calendar, Search } from "lucide-react";
+import { FileText, Upload, Download, Trash2, Eye, Calendar, Search, Building } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
@@ -80,15 +80,25 @@ export const DocumentManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedProperty, setSelectedProperty] = useState<string>("all");
 
+  const properties = ["Apartamento Centro Porto", "Casa Vila Nova de Gaia", "Loft Ribeira"];
+  
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          doc.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || doc.category === selectedCategory;
     const matchesStatus = selectedStatus === "all" || doc.status === selectedStatus;
+    const matchesProperty = selectedProperty === "all" || doc.propertyName === selectedProperty;
     
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory && matchesStatus && matchesProperty;
   });
+
+  // Group documents by property
+  const documentsByProperty = properties.reduce((acc, property) => {
+    acc[property] = filteredDocuments.filter(doc => doc.propertyName === property);
+    return acc;
+  }, {} as Record<string, Document[]>);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -101,46 +111,24 @@ export const DocumentManagementPage = () => {
     }
   };
 
-  const handleDownload = (doc: Document) => {
+  const handleDeleteDocument = (id: string) => {
+    setDocuments(documents.filter(doc => doc.id !== id));
     toast({
-      title: "Download iniciado",
-      description: `A transferir ${doc.name}...`,
+      title: "Documento Removido",
+      description: "Documento removido com sucesso.",
     });
   };
 
-  const handleDelete = (docId: string) => {
-    setDocuments(docs => docs.filter(doc => doc.id !== docId));
-    toast({
-      title: "Documento eliminado",
-      description: "O documento foi removido com sucesso.",
-    });
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge variant="default" className="bg-success text-success-foreground">Ativo</Badge>;
-      case "expired":
-        return <Badge variant="destructive">Expirado</Badge>;
-      case "expiring-soon":
-        return <Badge variant="secondary" className="bg-warning text-warning-foreground">A Expirar</Badge>;
-      default:
-        return <Badge variant="outline">Desconhecido</Badge>;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      "RNAL": "bg-blue-100 text-blue-800",
-      "Seguro": "bg-green-100 text-green-800",
-      "Fiscal": "bg-purple-100 text-purple-800",
-      "Faturas": "bg-orange-100 text-orange-800",
-      "Licenças": "bg-indigo-100 text-indigo-800",
-      "Contratos": "bg-pink-100 text-pink-800",
-      "Outros": "bg-gray-100 text-gray-800"
+  const getStatusStats = () => {
+    return {
+      total: documents.length,
+      active: documents.filter(d => d.status === "active").length,
+      expiring: documents.filter(d => d.status === "expiring-soon").length,
+      expired: documents.filter(d => d.status === "expired").length,
     };
-    return colors[category] || colors["Outros"];
   };
+
+  const stats = getStatusStats();
 
   return (
     <div className="space-y-6">
@@ -148,105 +136,88 @@ export const DocumentManagementPage = () => {
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold">Gestão Documental</h1>
           <p className="text-muted-foreground mt-1">
-            Organize e gerir todos os documentos do seu alojamento local
+            Organize e gerir documentos por propriedade
           </p>
         </div>
         
         <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
           <input
             type="file"
-            id="file-upload"
-            className="hidden"
+            accept=".pdf,.doc,.docx,.jpg,.png"
             onChange={handleFileUpload}
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            className="hidden"
+            id="file-upload"
             multiple
           />
-          <Button
-            onClick={() => document.getElementById('file-upload')?.click()}
-            className="w-full sm:w-auto"
-          >
+          <Button onClick={() => document.getElementById('file-upload')?.click()}>
             <Upload className="h-4 w-4 mr-2" />
-            Carregar Documento
+            Carregar Documentos
           </Button>
         </div>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Documentos</p>
-                <p className="text-2xl font-bold">{documents.length}</p>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
               </div>
               <FileText className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Documentos Ativos</p>
-                <p className="text-2xl font-bold text-success">
-                  {documents.filter(d => d.status === "active").length}
-                </p>
+                <p className="text-sm text-muted-foreground">Ativos</p>
+                <p className="text-2xl font-bold text-success">{stats.active}</p>
               </div>
-              <Badge variant="default" className="bg-success text-success-foreground text-xs">
-                Ativo
+              <Badge className="bg-success text-success-foreground">
+                {Math.round((stats.active / stats.total) * 100)}%
               </Badge>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">A Expirar</p>
-                <p className="text-2xl font-bold text-warning">
-                  {documents.filter(d => d.status === "expiring-soon").length}
-                </p>
+                <p className="text-2xl font-bold text-warning">{stats.expiring}</p>
               </div>
-              <Badge variant="secondary" className="bg-warning text-warning-foreground text-xs">
-                Alerta
-              </Badge>
+              <Calendar className="h-8 w-8 text-warning" />
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-soft">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Expirados</p>
-                <p className="text-2xl font-bold text-destructive">
-                  {documents.filter(d => d.status === "expired").length}
-                </p>
+                <p className="text-2xl font-bold text-destructive">{stats.expired}</p>
               </div>
-              <Badge variant="destructive" className="text-xs">
-                Expirado
-              </Badge>
+              <Badge variant="destructive">{stats.expired}</Badge>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Pesquisar</label>
+      <Card className="shadow-soft">
+        <CardContent className="p-4">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Nome do documento..."
+                  placeholder="Procurar documentos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -254,34 +225,40 @@ export const DocumentManagementPage = () => {
               </div>
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Categoria</label>
+            <div className="flex flex-wrap gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar categoria" />
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas as categorias</SelectItem>
-                  {documentCategories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
+                  <SelectItem value="all">Todas as Categorias</SelectItem>
+                  {documentCategories.map((category) => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Estado</label>
+              
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar estado" />
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os estados</SelectItem>
+                  <SelectItem value="all">Todos os Estados</SelectItem>
                   <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="expiring-soon">A Expirar</SelectItem>
                   <SelectItem value="expired">Expirado</SelectItem>
+                  <SelectItem value="expiring-soon">A Expirar</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                <SelectTrigger className="w-52">
+                  <SelectValue placeholder="Propriedade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as Propriedades</SelectItem>
+                  {properties.map((property) => (
+                    <SelectItem key={property} value={property}>{property}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -289,91 +266,143 @@ export const DocumentManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Documents List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Documentos ({filteredDocuments.length})</CardTitle>
-          <CardDescription>
-            Lista de todos os documentos organizados por categoria
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {filteredDocuments.length === 0 ? (
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Nenhum documento encontrado com os filtros aplicados.
-                </p>
-              </div>
-            ) : (
-              filteredDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors space-y-3 lg:space-y-0"
-                >
-                  <div className="flex items-start space-x-3">
-                    <FileText className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-medium truncate">{doc.name}</h3>
-                        <p className="text-sm text-muted-foreground">{doc.propertyName}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${getCategoryColor(doc.category)}`}
-                          >
-                            {doc.category}
-                          </Badge>
-                          {getStatusBadge(doc.status)}
-                          <span className="text-xs text-muted-foreground">{doc.size}</span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-xs text-muted-foreground">
-                          <span>Carregado: {new Date(doc.uploadDate).toLocaleDateString('pt-PT')}</span>
-                          {doc.expiryDate && (
-                            <span className="flex items-center">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              Expira: {new Date(doc.expiryDate).toLocaleDateString('pt-PT')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+      {/* Documents by Property */}
+      {selectedProperty === "all" ? (
+        // Show organized by property folders
+        <div className="space-y-8">
+          {Object.entries(documentsByProperty).map(([property, docs]) => (
+            docs.length > 0 && (
+              <Card key={property} className="shadow-soft">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Building className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{property}</CardTitle>
+                      <CardDescription>{docs.length} documento(s)</CardDescription>
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-2 lg:ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(doc)}
-                      className="flex-1 lg:flex-initial"
-                    >
-                      <Eye className="h-4 w-4 mr-1 lg:mr-2" />
-                      <span className="hidden sm:inline">Visualizar</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(doc)}
-                      className="flex-1 lg:flex-initial"
-                    >
-                      <Download className="h-4 w-4 mr-1 lg:mr-2" />
-                      <span className="hidden sm:inline">Download</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(doc.id)}
-                      className="text-destructive hover:text-destructive flex-1 lg:flex-initial"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1 lg:mr-2" />
-                      <span className="hidden sm:inline">Eliminar</span>
-                    </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {docs.map((doc) => (
+                      <DocumentCard key={doc.id} doc={doc} onDelete={handleDeleteDocument} />
+                    ))}
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                </CardContent>
+              </Card>
+            )
+          ))}
+          {filteredDocuments.length === 0 && (
+            <div className="text-center py-12">
+              <FileText className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                Nenhum documento encontrado
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Carregue o primeiro documento para começar
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        // Show single property view
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDocuments.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <FileText className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                Nenhum documento encontrado
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Carregue o primeiro documento para começar
+              </p>
+            </div>
+          ) : (
+            filteredDocuments.map((doc) => (
+              <DocumentCard key={doc.id} doc={doc} onDelete={handleDeleteDocument} />
+            ))
+          )}
+        </div>
+      )}
     </div>
+  );
+};
+
+// Separate DocumentCard component for reusability
+const DocumentCard = ({ doc, onDelete }: { doc: Document; onDelete: (id: string) => void }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-success/20 text-success border-success/30";
+      case "expired":
+        return "bg-destructive/20 text-destructive border-destructive/30";
+      case "expiring-soon":
+        return "bg-warning/20 text-warning border-warning/30";
+      default:
+        return "bg-muted/50 text-muted-foreground border-muted/30";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "active":
+        return "Ativo";
+      case "expired":
+        return "Expirado";
+      case "expiring-soon":
+        return "A Expirar";
+      default:
+        return "Desconhecido";
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-md transition-all duration-300 hover-scale">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <Badge className={getStatusColor(doc.status)}>
+              {getStatusText(doc.status)}
+            </Badge>
+          </div>
+        </div>
+        
+        <h3 className="font-medium text-sm mb-1 truncate" title={doc.name}>
+          {doc.name}
+        </h3>
+        
+        <div className="space-y-1 text-xs text-muted-foreground mb-3">
+          <p>Categoria: {doc.category}</p>
+          <p>Propriedade: {doc.propertyName}</p>
+          <p>Tamanho: {doc.size}</p>
+          <p>Carregado: {new Date(doc.uploadDate).toLocaleDateString('pt-PT')}</p>
+          {doc.expiryDate && (
+            <p>Expira: {new Date(doc.expiryDate).toLocaleDateString('pt-PT')}</p>
+          )}
+        </div>
+        
+        <div className="flex justify-between">
+          <Button variant="outline" size="sm" className="flex-1 mr-2">
+            <Eye className="h-3 w-3 mr-1" />
+            Ver
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 mr-2">
+            <Download className="h-3 w-3 mr-1" />
+            Download
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onDelete(doc.id)}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

@@ -395,7 +395,7 @@ export const StaffManagementPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Configurações de Automação</CardTitle>
-              <CardDescription>Configurar regras automáticas para atribuição de tarefas</CardDescription>
+              <CardDescription>Configurar atribuições de tarefas por membro da equipa</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
@@ -411,58 +411,79 @@ export const StaffManagementPage = () => {
                 />
               </div>
 
-              <div className="space-y-4">
-                <h3 className="font-medium">Regras de Atribuição</h3>
+              <div className="space-y-6">
+                <h3 className="font-medium">Atribuições por Staff</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Limpeza → Housekeeping</Label>
-                    <Select defaultValue="maria">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="maria">Maria Silva</SelectItem>
-                        <SelectItem value="auto">Automático</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Manutenção → Técnico</Label>
-                    <Select defaultValue="joao">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="joao">João Santos</SelectItem>
-                        <SelectItem value="auto">Automático</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Check-in → Guest Relations</Label>
-                    <Select defaultValue="ana">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ana">Ana Costa</SelectItem>
-                        <SelectItem value="auto">Automático</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Tempo Antecedência (horas)</Label>
-                    <Input type="number" defaultValue="2" />
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <Button>Guardar Configurações</Button>
-                </div>
+                {staff.map((member) => (
+                  <Card key={member.id} className="p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-full bg-primary/10">
+                          <Users className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">{member.name}</h4>
+                          <p className="text-sm text-muted-foreground">{member.role}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch 
+                          checked={member.isActive}
+                          onCheckedChange={(checked) => {
+                            setStaff(staff.map(s => 
+                              s.id === member.id ? { ...s, isActive: checked } : s
+                            ));
+                          }}
+                        />
+                        <Label className="text-sm">Disponível</Label>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Tarefas Atribuídas:</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label className="text-xs">Tipo de Tarefa Principal</Label>
+                          <Select defaultValue={member.role === "Housekeeping" ? "cleaning" : member.role === "Manutenção" ? "maintenance" : "checkin"}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cleaning">Limpeza</SelectItem>
+                              <SelectItem value="maintenance">Manutenção</SelectItem>
+                              <SelectItem value="checkin">Check-in</SelectItem>
+                              <SelectItem value="checkout">Check-out</SelectItem>
+                              <SelectItem value="other">Outras</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label className="text-xs">Propriedades Atribuídas</Label>
+                          <Select defaultValue="all">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Todas as Propriedades</SelectItem>
+                              <SelectItem value="apartamento">Apartamento Centro Porto</SelectItem>
+                              <SelectItem value="casa">Casa Vila Nova de Gaia</SelectItem>
+                              <SelectItem value="loft">Loft Ribeira</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {member.skills.map((skill) => (
+                          <Badge key={skill} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>

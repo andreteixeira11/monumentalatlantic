@@ -151,17 +151,60 @@ export const SmartLockPage = () => {
     });
   };
 
-  const handleGenerateAccessCode = () => {
+  const handleGenerateAccessCode = (guestName: string, validFrom: string, validUntil: string, maxUsage?: number) => {
     if (!selectedLock) return;
     
     const newCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const newAccessCode: AccessCode = {
+      id: `code-${Date.now()}`,
+      code: newCode,
+      guestName,
+      validFrom,
+      validUntil,
+      isActive: true,
+      usageCount: 0,
+      maxUsage
+    };
+    
+    setSmartLocks(locks =>
+      locks.map(lock =>
+        lock.id === selectedLock.id
+          ? { ...lock, accessCodes: [...lock.accessCodes, newAccessCode] }
+          : lock
+      )
+    );
     
     toast({
       title: "Código Gerado",
-      description: `Novo código de acesso: ${newCode}`,
+      description: `Novo código de acesso: ${newCode} para ${guestName}`,
     });
     
     setShowAddCode(false);
+  };
+
+  const handleAddNewLock = (lockData: {
+    name: string;
+    propertyName: string;
+    brand: "yale" | "august" | "schlage" | "nuki" | "other";
+  }) => {
+    const newLock: SmartLock = {
+      id: `lock-${Date.now()}`,
+      name: lockData.name,
+      propertyName: lockData.propertyName,
+      brand: lockData.brand,
+      status: "online",
+      batteryLevel: 100,
+      lockStatus: "locked",
+      lastActivity: new Date().toISOString(),
+      accessCodes: []
+    };
+    
+    setSmartLocks([...smartLocks, newLock]);
+    
+    toast({
+      title: "Fechadura Adicionada",
+      description: `${lockData.name} foi adicionada com sucesso.`,
+    });
   };
 
   const handleDeleteAccessCode = (lockId: string, codeId: string) => {
@@ -558,7 +601,224 @@ export const SmartLockPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Settings */}
+        <TabsContent value="settings" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Adicionar Nova Fechadura</CardTitle>
+                <CardDescription>Conectar uma nova fechadura inteligente</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AddLockForm onSubmit={handleAddNewLock} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações Gerais</CardTitle>
+                <CardDescription>Configurações do sistema de fechaduras</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Auto-bloqueio</h4>
+                    <p className="text-sm text-muted-foreground">Bloquear fechaduras automaticamente após check-out</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Notificações</h4>
+                    <p className="text-sm text-muted-foreground">Receber alertas de bateria baixa</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">Registo de Acesso</h4>
+                    <p className="text-sm text-muted-foreground">Manter histórico de todos os acessos</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
+
+      {/* Add Code Modal */}
+      {showAddCode && (
+        <AddCodeModal
+          onClose={() => setShowAddCode(false)}
+          onSubmit={handleGenerateAccessCode}
+          locks={smartLocks}
+        />
+      )}
+    </div>
+  );
+};
+
+// Add Lock Form Component
+const AddLockForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    propertyName: "",
+    brand: "yale" as const
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.name && formData.propertyName) {
+      onSubmit(formData);
+      setFormData({ name: "", propertyName: "", brand: "yale" });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label>Nome da Fechadura</Label>
+        <Input
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="Ex: Porta Principal"
+          required
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Propriedade</Label>
+        <Select value={formData.propertyName} onValueChange={(value) => setFormData({ ...formData, propertyName: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione a propriedade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Apartamento Centro Porto">Apartamento Centro Porto</SelectItem>
+            <SelectItem value="Casa Vila Nova de Gaia">Casa Vila Nova de Gaia</SelectItem>
+            <SelectItem value="Loft Ribeira">Loft Ribeira</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Marca</Label>
+        <Select value={formData.brand} onValueChange={(value: any) => setFormData({ ...formData, brand: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="yale">Yale</SelectItem>
+            <SelectItem value="august">August</SelectItem>
+            <SelectItem value="schlage">Schlage</SelectItem>
+            <SelectItem value="nuki">Nuki</SelectItem>
+            <SelectItem value="other">Outro</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <Button type="submit" className="w-full">
+        <Plus className="h-4 w-4 mr-2" />
+        Adicionar Fechadura
+      </Button>
+    </form>
+  );
+};
+
+// Add Code Modal Component
+const AddCodeModal = ({ 
+  onClose, 
+  onSubmit, 
+  locks 
+}: { 
+  onClose: () => void; 
+  onSubmit: (guestName: string, validFrom: string, validUntil: string, maxUsage?: number) => void;
+  locks: SmartLock[];
+}) => {
+  const [formData, setFormData] = useState({
+    guestName: "",
+    validFrom: "",
+    validUntil: "",
+    maxUsage: ""
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.guestName && formData.validFrom && formData.validUntil) {
+      onSubmit(
+        formData.guestName,
+        formData.validFrom,
+        formData.validUntil,
+        formData.maxUsage ? parseInt(formData.maxUsage) : undefined
+      );
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <Card className="w-full max-w-md mx-4">
+        <CardHeader>
+          <CardTitle>Novo Código de Acesso</CardTitle>
+          <CardDescription>Gerar código temporário para hóspede</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome do Hóspede</Label>
+              <Input
+                value={formData.guestName}
+                onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
+                placeholder="Nome completo"
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Válido de</Label>
+                <Input
+                  type="date"
+                  value={formData.validFrom}
+                  onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Válido até</Label>
+                <Input
+                  type="date"
+                  value={formData.validUntil}
+                  onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Máximo de Utilizações (opcional)</Label>
+              <Input
+                type="number"
+                value={formData.maxUsage}
+                onChange={(e) => setFormData({ ...formData, maxUsage: e.target.value })}
+                placeholder="Deixe vazio para ilimitado"
+              />
+            </div>
+            
+            <div className="flex space-x-3 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1">
+                Gerar Código
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

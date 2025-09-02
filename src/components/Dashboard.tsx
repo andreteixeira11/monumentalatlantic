@@ -172,20 +172,40 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
   const isCollapsed = state === "collapsed";
   const [financesOpen, setFinancesOpen] = useState(currentPage.startsWith("finances"));
 
-  const menuItems = [
-    { id: "dashboard" as const, title: "Dashboard", icon: Home },
-    { id: "reservations" as const, title: "Reservas", icon: BookOpen },
-    { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
-    { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
-    { id: "documents" as const, title: "Gestão Documental", icon: FileText },
-    { id: "billing" as const, title: "Faturação", icon: CreditCard },
-    { id: "staff" as const, title: "Gestão de Staff", icon: UsersIcon },
-    { id: "templates" as const, title: "Templates", icon: FileTextIcon },
-    { id: "smart-lock" as const, title: "Smart Hub Lock", icon: Lock },
-    { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
-    { id: "reviews" as const, title: "Reviews", icon: StarIcon },
-    { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
-    { id: "configurations" as const, title: "Configurações", icon: Settings },
+  const menuGroups = [
+    {
+      label: "Principal",
+      items: [
+        { id: "dashboard" as const, title: "Dashboard", icon: Home, gradient: true },
+        { id: "reservations" as const, title: "Reservas", icon: BookOpen },
+        { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
+        { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
+      ]
+    },
+    {
+      label: "Gestão",
+      items: [
+        { id: "documents" as const, title: "Gestão Documental", icon: FileText },
+        { id: "billing" as const, title: "Faturação", icon: CreditCard },
+        { id: "staff" as const, title: "Gestão de Staff", icon: UsersIcon },
+        { id: "templates" as const, title: "Templates", icon: FileTextIcon },
+        { id: "smart-lock" as const, title: "Smart Hub Lock", icon: Lock },
+      ]
+    },
+    {
+      label: "Comunicação",
+      items: [
+        { id: "messages" as const, title: "Mensagens", icon: MessageCircle },
+        { id: "reviews" as const, title: "Reviews", icon: StarIcon },
+      ]
+    },
+    {
+      label: "Sistema",
+      items: [
+        { id: "tourist-tax" as const, title: "Taxa Turística", icon: Building },
+        { id: "configurations" as const, title: "Configurações", icon: Settings },
+      ]
+    }
   ];
 
   const financeItems = [
@@ -194,86 +214,174 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
   ];
 
   return (
-    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarContent>
-        {/* Logo */}
-        <div className="p-4 border-b">
+    <Sidebar 
+      className={`${isCollapsed ? "w-16" : "w-72"} transition-all duration-300 bg-gradient-to-b from-background via-background/95 to-background/90 border-r border-border/40 backdrop-blur-sm shadow-elegant`} 
+      collapsible="icon"
+    >
+      <SidebarContent className="p-0">
+        {/* Logo Section */}
+        <div className="p-6 border-b border-border/20 bg-gradient-subtle">
           <div className="flex items-center space-x-3">
-            <img 
-              src={logoImage} 
-              alt="Logo" 
-              className="h-8 w-8 object-contain flex-shrink-0"
-            />
+            <div className="relative">
+              <img 
+                src={logoImage} 
+                alt="Logo" 
+                className="h-10 w-10 object-contain flex-shrink-0 rounded-xl shadow-glow"
+              />
+              <div className="absolute -inset-1 bg-gradient-primary rounded-xl opacity-20 blur-sm"></div>
+            </div>
             {!isCollapsed && (
-              <span className="text-lg font-semibold truncate">Monumental</span>
+              <div className="animate-fade-in">
+                <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">Monumental</span>
+                <p className="text-xs text-muted-foreground mt-0.5">Alojamento Local</p>
+              </div>
             )}
           </div>
         </div>
 
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton 
-                    onClick={() => setCurrentPage(item.id)}
-                    className={`w-full ${
-                      currentPage === item.id 
-                        ? "bg-primary text-primary-foreground" 
-                        : "hover:bg-accent"
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {!isCollapsed && <span>{item.title}</span>}
-                  </SidebarMenuButton>
+        <div className="flex-1 py-4 space-y-6">
+          {menuGroups.map((group, groupIndex) => (
+            <SidebarGroup key={group.label} className="px-3">
+              {!isCollapsed && (
+                <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider px-3 pb-2">
+                  {group.label}
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-2">
+                  {group.items.map((item, index) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        onClick={() => setCurrentPage(item.id)}
+                        className={`
+                          group relative h-12 rounded-xl transition-all duration-300 hover-scale
+                          ${currentPage === item.id 
+                            ? "bg-gradient-primary text-white shadow-glow font-medium" 
+                            : "hover:bg-accent/60 hover:shadow-soft text-foreground/80 hover:text-foreground"
+                          }
+                          ${!isCollapsed ? "justify-start pl-4 pr-6" : "justify-center"}
+                        `}
+                        style={{ animationDelay: `${(groupIndex * 100) + (index * 50)}ms` }}
+                      >
+                        <div className={`
+                          flex items-center justify-center w-8 h-8 rounded-lg
+                          ${currentPage === item.id 
+                            ? "bg-white/20" 
+                            : "bg-primary/10 group-hover:bg-primary/20"
+                          }
+                          transition-all duration-300
+                        `}>
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        {!isCollapsed && (
+                          <span className="ml-3 text-sm font-medium">{item.title}</span>
+                        )}
+                        {currentPage === item.id && (
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full"></div>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+          
+          {/* Finanças collapsible group */}
+          <SidebarGroup className="px-3">
+            {!isCollapsed && (
+              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider px-3 pb-2">
+                Finanças
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-2">
+                <SidebarMenuItem>
+                  <Collapsible open={financesOpen} onOpenChange={setFinancesOpen}>
+                    <CollapsibleTrigger className="w-full">
+                      <SidebarMenuButton 
+                        className={`
+                          group relative h-12 rounded-xl transition-all duration-300 hover-scale w-full
+                          ${currentPage.startsWith("finances") 
+                            ? "bg-gradient-primary text-white shadow-glow font-medium" 
+                            : "hover:bg-accent/60 hover:shadow-soft text-foreground/80 hover:text-foreground"
+                          }
+                          ${!isCollapsed ? "justify-start pl-4 pr-6" : "justify-center"}
+                        `}
+                      >
+                        <div className={`
+                          flex items-center justify-center w-8 h-8 rounded-lg
+                          ${currentPage.startsWith("finances") 
+                            ? "bg-white/20" 
+                            : "bg-primary/10 group-hover:bg-primary/20"
+                          }
+                          transition-all duration-300
+                        `}>
+                          <Banknote className="h-4 w-4" />
+                        </div>
+                        {!isCollapsed && (
+                          <>
+                            <span className="ml-3 text-sm font-medium">Finanças</span>
+                            <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-300 ${financesOpen ? 'rotate-90' : ''}`} />
+                          </>
+                        )}
+                        {currentPage.startsWith("finances") && (
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full"></div>
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    {!isCollapsed && (
+                      <CollapsibleContent className="animate-accordion-down">
+                        <div className="ml-4 mt-2 space-y-2 border-l border-border/30 pl-4">
+                          {financeItems.map((item, index) => (
+                            <SidebarMenuButton
+                              key={item.id}
+                              onClick={() => setCurrentPage(item.id)}
+                              className={`
+                                group relative h-10 rounded-lg transition-all duration-300 hover-scale text-sm w-full
+                                ${currentPage === item.id 
+                                  ? "bg-primary/20 text-primary font-medium shadow-soft" 
+                                  : "hover:bg-accent/40 text-foreground/70 hover:text-foreground"
+                                }
+                                justify-start pl-3 pr-4
+                              `}
+                              style={{ animationDelay: `${index * 100}ms` }}
+                            >
+                              <div className={`
+                                flex items-center justify-center w-6 h-6 rounded-md
+                                ${currentPage === item.id 
+                                  ? "bg-primary/20" 
+                                  : "bg-primary/10 group-hover:bg-primary/20"
+                                }
+                                transition-all duration-300
+                              `}>
+                                <item.icon className="h-3 w-3" />
+                              </div>
+                              <span className="ml-2">{item.title}</span>
+                            </SidebarMenuButton>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    )}
+                  </Collapsible>
                 </SidebarMenuItem>
-              ))}
-              
-              {/* Finanças collapsible group */}
-              <SidebarMenuItem>
-                <Collapsible open={financesOpen} onOpenChange={setFinancesOpen}>
-                  <CollapsibleTrigger className="w-full">
-                    <SidebarMenuButton 
-                      className={`w-full ${
-                        currentPage.startsWith("finances") 
-                          ? "bg-primary text-primary-foreground" 
-                          : "hover:bg-accent"
-                      }`}
-                    >
-                      <Banknote className="h-4 w-4" />
-                      {!isCollapsed && (
-                        <>
-                          <span>Finanças</span>
-                          <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${financesOpen ? 'rotate-90' : ''}`} />
-                        </>
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  {!isCollapsed && (
-                    <CollapsibleContent>
-                      <div className="ml-4 mt-1 space-y-1">
-                        {financeItems.map((item) => (
-                          <SidebarMenuButton
-                            key={item.id}
-                            onClick={() => setCurrentPage(item.id)}
-                            className={`w-full text-sm ${
-                              currentPage === item.id 
-                                ? "bg-primary/20 text-primary" 
-                                : "hover:bg-accent"
-                            }`}
-                          >
-                            <item.icon className="h-3 w-3" />
-                            <span>{item.title}</span>
-                          </SidebarMenuButton>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  )}
-                </Collapsible>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </div>
+
+        {/* Footer */}
+        {!isCollapsed && (
+          <div className="p-4 border-t border-border/20 bg-gradient-subtle">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Portal v2.1.0</span>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                <span>Online</span>
+              </div>
+            </div>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );

@@ -95,6 +95,55 @@ export const TouristTaxPage = () => {
   };
 
   const handleGenerateReport = () => {
+    // Generate PDF report using jsPDF
+    const doc = new (window as any).jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Relatório Taxa Turística', 20, 30);
+    
+    // Add date
+    doc.setFontSize(12);
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-PT')}`, 20, 50);
+    
+    // Prepare table data
+    const tableData = taxEntries.map(entry => [
+      entry.guestName,
+      entry.property,
+      new Date(entry.checkInDate).toLocaleDateString('pt-PT'),
+      new Date(entry.checkOutDate).toLocaleDateString('pt-PT'),
+      entry.nights.toString(),
+      entry.guests.toString(),
+      `€${entry.totalTax.toFixed(2)}`,
+      entry.status === 'pending' ? 'Pendente' : entry.status === 'submitted' ? 'Submetida' : 'Paga'
+    ]);
+    
+    // Add table
+    (doc as any).autoTable({
+      startY: 70,
+      head: [['Hóspede', 'Propriedade', 'Check-in', 'Check-out', 'Noites', 'Pessoas', 'Taxa', 'Estado']],
+      body: tableData,
+      theme: 'grid',
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [66, 139, 202],
+        textColor: 255,
+      },
+    });
+    
+    // Calculate totals
+    const totalTax = taxEntries.reduce((sum, entry) => sum + entry.totalTax, 0);
+    const yPosition = (doc as any).lastAutoTable.finalY || 150;
+    
+    doc.setFontSize(14);
+    doc.text(`Total Taxa Turística: €${totalTax.toFixed(2)}`, 20, yPosition + 20);
+    
+    // Save the PDF
+    doc.save('relatorio-taxa-turistica.pdf');
+    
     toast({
       title: "Relatório Gerado",
       description: "O relatório da taxa turística foi gerado e está pronto para download.",
