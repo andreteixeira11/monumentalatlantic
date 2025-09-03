@@ -97,9 +97,57 @@ export const BillingPage = () => {
   };
 
   const handleDownloadSAFT = () => {
+    // Generate SAF-T PDF using jsPDF
+    const doc = new (window as any).jsPDF();
+    
+    // Add title and header
+    doc.setFontSize(20);
+    doc.text('SAF-T - Faturação', 20, 30);
+    
+    doc.setFontSize(12);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-PT')}`, 20, 50);
+    doc.text('Sistema de Alojamento Local', 20, 60);
+    
+    // Prepare invoice data for table
+    const tableData = invoices.map(invoice => [
+      invoice.number,
+      invoice.clientName,
+      invoice.propertyName,
+      new Date(invoice.date).toLocaleDateString('pt-PT'),
+      `€${invoice.amount.toFixed(2)}`,
+      invoice.status === 'paid' ? 'Paga' : invoice.status === 'pending' ? 'Pendente' : 'Atraso'
+    ]);
+    
+    // Add invoices table
+    (doc as any).autoTable({
+      startY: 80,
+      head: [['Nº Fatura', 'Cliente', 'Propriedade', 'Data', 'Valor', 'Estado']],
+      body: tableData,
+      theme: 'grid',
+      styles: {
+        fontSize: 9,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [66, 139, 202],
+        textColor: 255,
+      },
+    });
+    
+    // Add totals
+    const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const yPosition = (doc as any).lastAutoTable.finalY || 150;
+    
+    doc.setFontSize(12);
+    doc.text(`Total Faturado: €${totalAmount.toFixed(2)}`, 20, yPosition + 20);
+    doc.text(`Total de Faturas: ${invoices.length}`, 20, yPosition + 30);
+    
+    // Save the PDF
+    doc.save('saft-faturacao.pdf');
+    
     toast({
       title: "SAF-T Gerado",
-      description: "Ficheiro SAF-T foi gerado para submissão no e-fatura.",
+      description: "Ficheiro SAF-T foi gerado e está pronto para download.",
     });
   };
 
@@ -285,7 +333,45 @@ export const BillingPage = () => {
                           <Eye className="h-4 w-4 mr-1" />
                           Ver
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            // Generate individual invoice PDF
+                            const doc = new (window as any).jsPDF();
+                            
+                            // Header
+                            doc.setFontSize(18);
+                            doc.text('FATURA', 20, 30);
+                            
+                            // Invoice details
+                            doc.setFontSize(12);
+                            doc.text(`Número: ${invoice.number}`, 20, 50);
+                            doc.text(`Cliente: ${invoice.clientName}`, 20, 60);
+                            doc.text(`Propriedade: ${invoice.propertyName}`, 20, 70);
+                            doc.text(`Data de Emissão: ${new Date(invoice.date).toLocaleDateString('pt-PT')}`, 20, 80);
+                            doc.text(`Data de Vencimento: ${new Date(invoice.dueDate).toLocaleDateString('pt-PT')}`, 20, 90);
+                            
+                            // Amount
+                            doc.setFontSize(16);
+                            doc.text(`Valor Total: €${invoice.amount.toFixed(2)}`, 20, 120);
+                            
+                            // Status
+                            doc.setFontSize(12);
+                            const statusText = invoice.status === 'paid' ? 'PAGA' : invoice.status === 'pending' ? 'PENDENTE' : 'EM ATRASO';
+                            doc.text(`Estado: ${statusText}`, 20, 140);
+                            
+                            // Footer
+                            doc.text('Emitida através do Portal de Alojamento Local', 20, 200);
+                            
+                            doc.save(`fatura-${invoice.number}.pdf`);
+                            
+                            toast({
+                              title: "PDF Gerado",
+                              description: `Fatura ${invoice.number} pronta para download.`,
+                            });
+                          }}
+                        >
                           <Download className="h-4 w-4 mr-1" />
                           PDF
                         </Button>

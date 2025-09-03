@@ -248,19 +248,33 @@ export const TemplatesPage = () => {
   };
 
   const handleDownloadTemplate = (template: Template) => {
-    const blob = new Blob([template.content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${template.name.replace(/\s+/g, '_')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Generate PDF using jsPDF
+    const doc = new (window as any).jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text(template.name, 20, 30);
+    
+    // Add category and description
+    doc.setFontSize(12);
+    doc.text(`Categoria: ${getCategoryName(template.category)}`, 20, 50);
+    doc.text(`Descrição: ${template.description}`, 20, 60);
+    doc.text(`Última modificação: ${new Date(template.lastModified).toLocaleDateString('pt-PT')}`, 20, 70);
+    
+    // Add separator line
+    doc.line(20, 80, 190, 80);
+    
+    // Add content
+    doc.setFontSize(10);
+    const splitContent = doc.splitTextToSize(template.content, 170);
+    doc.text(splitContent, 20, 90);
+    
+    // Save the PDF
+    doc.save(`${template.name.replace(/\s+/g, '_')}.pdf`);
     
     toast({
-      title: "Download Iniciado",
-      description: `A transferir ${template.name}...`,
+      title: "PDF Gerado",
+      description: `Template ${template.name} pronto para download.`,
     });
   };
 

@@ -7,9 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { Settings, Key, CreditCard, FileText, Users, Mail, Wifi, Home, Building, Hash, Euro, Plus, Trash2, Eye } from "lucide-react";
+import { Settings, Key, CreditCard, FileText, Users, Mail, Wifi, Home, Building, Hash, Euro, Plus, Trash2, Eye, Cog } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PropertyConfigModal } from "./PropertyConfigModal";
 
 interface ApiConfiguration {
   bookingApi: string;
@@ -55,6 +57,155 @@ interface TouristTaxConfig {
   establishmentCode: string;
   taxRate: number;
 }
+
+const PropertyCard = ({ property, index, properties, setProperties }: {
+  property: Property;
+  index: number;
+  properties: Property[];
+  setProperties: (properties: Property[]) => void;
+}) => {
+  const [showConfigModal, setShowConfigModal] = useState(false);
+
+  const handleSavePropertyConfig = (propertyId: string, config: any) => {
+    // Config is already saved in the modal to localStorage
+    console.log(`Config saved for property ${propertyId}`);
+  };
+
+  return (
+    <>
+      <div className="p-4 border rounded-lg bg-card">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label>Nome da Propriedade</Label>
+            <Input
+              value={property.name}
+              onChange={(e) => {
+                const updated = [...properties];
+                updated[index].name = e.target.value;
+                setProperties(updated);
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tipo de Propriedade</Label>
+            <Select 
+              value={property.type} 
+              onValueChange={(value) => {
+                const updated = [...properties];
+                updated[index].type = value;
+                setProperties(updated);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="apartment">Apartamento</SelectItem>
+                <SelectItem value="house">Casa</SelectItem>
+                <SelectItem value="studio">Estúdio</SelectItem>
+                <SelectItem value="villa">Moradia</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Máximo de Hóspedes</Label>
+            <Input
+              type="number"
+              value={property.maxGuests}
+              onChange={(e) => {
+                const updated = [...properties];
+                updated[index].maxGuests = parseInt(e.target.value);
+                setProperties(updated);
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Check-in</Label>
+            <Input
+              type="time"
+              value={property.checkInTime}
+              onChange={(e) => {
+                const updated = [...properties];
+                updated[index].checkInTime = e.target.value;
+                setProperties(updated);
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Check-out</Label>
+            <Input
+              type="time"
+              value={property.checkOutTime}
+              onChange={(e) => {
+                const updated = [...properties];
+                updated[index].checkOutTime = e.target.value;
+                setProperties(updated);
+              }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={property.isActive}
+                onCheckedChange={(checked) => {
+                  const updated = [...properties];
+                  updated[index].isActive = checked;
+                  setProperties(updated);
+                }}
+              />
+              <Label>Ativa</Label>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowConfigModal(true)}
+              >
+                <Cog className="h-4 w-4 mr-1" />
+                Config
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setProperties(properties.filter(p => p.id !== property.id));
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Configuration badges */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {localStorage.getItem(`property-config-${property.id}`) && (
+            <>
+              <Badge variant="secondary">SIBA</Badge>
+              <Badge variant="secondary">Taxa Turística</Badge>
+              <Badge variant="secondary">INE</Badge>
+              <Badge variant="secondary">Formulário</Badge>
+              <Badge variant="secondary">Notificações</Badge>
+            </>
+          )}
+        </div>
+      </div>
+
+      <PropertyConfigModal
+        property={property}
+        isOpen={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        onSave={handleSavePropertyConfig}
+      />
+    </>
+  );
+};
 
 export const ConfigurationsPage = () => {
   const { toast } = useToast();
@@ -287,7 +438,7 @@ export const ConfigurationsPage = () => {
               <div>
                 <CardTitle>Minhas Propriedades</CardTitle>
                 <CardDescription>
-                  Gerir as suas propriedades de alojamento
+                  Gerir as suas propriedades e configurações específicas
                 </CardDescription>
               </div>
               <Button onClick={() => {
@@ -309,106 +460,13 @@ export const ConfigurationsPage = () => {
             <CardContent>
               <div className="space-y-4">
                 {properties.map((property, index) => (
-                  <div key={property.id} className="p-4 border rounded-lg bg-card">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label>Nome da Propriedade</Label>
-                        <Input
-                          value={property.name}
-                          onChange={(e) => {
-                            const updated = [...properties];
-                            updated[index].name = e.target.value;
-                            setProperties(updated);
-                          }}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Tipo de Propriedade</Label>
-                        <Select 
-                          value={property.type} 
-                          onValueChange={(value) => {
-                            const updated = [...properties];
-                            updated[index].type = value;
-                            setProperties(updated);
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="apartment">Apartamento</SelectItem>
-                            <SelectItem value="house">Casa</SelectItem>
-                            <SelectItem value="studio">Estúdio</SelectItem>
-                            <SelectItem value="villa">Moradia</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Máximo de Hóspedes</Label>
-                        <Input
-                          type="number"
-                          value={property.maxGuests}
-                          onChange={(e) => {
-                            const updated = [...properties];
-                            updated[index].maxGuests = parseInt(e.target.value);
-                            setProperties(updated);
-                          }}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Check-in</Label>
-                        <Input
-                          type="time"
-                          value={property.checkInTime}
-                          onChange={(e) => {
-                            const updated = [...properties];
-                            updated[index].checkInTime = e.target.value;
-                            setProperties(updated);
-                          }}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Check-out</Label>
-                        <Input
-                          type="time"
-                          value={property.checkOutTime}
-                          onChange={(e) => {
-                            const updated = [...properties];
-                            updated[index].checkOutTime = e.target.value;
-                            setProperties(updated);
-                          }}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            checked={property.isActive}
-                            onCheckedChange={(checked) => {
-                              const updated = [...properties];
-                              updated[index].isActive = checked;
-                              setProperties(updated);
-                            }}
-                          />
-                          <Label>Ativa</Label>
-                        </div>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setProperties(properties.filter(p => p.id !== property.id));
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <PropertyCard 
+                    key={property.id} 
+                    property={property} 
+                    index={index}
+                    properties={properties}
+                    setProperties={setProperties}
+                  />
                 ))}
               </div>
             </CardContent>

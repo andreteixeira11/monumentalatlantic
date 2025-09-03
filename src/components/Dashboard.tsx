@@ -215,69 +215,53 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
 
   return (
     <Sidebar 
-      className={`${isCollapsed ? "w-16" : "w-72"} transition-all duration-300 bg-gradient-to-b from-background via-background/95 to-background/90 border-r border-border/40 backdrop-blur-sm shadow-elegant`} 
+      className={`${isCollapsed ? "w-14" : "w-64"} transition-all duration-300 bg-background/95 border-r border-border/60 backdrop-blur-sm`} 
       collapsible="icon"
     >
       <SidebarContent className="p-0">
         {/* Logo Section */}
-        <div className="p-6 border-b border-border/20 bg-gradient-subtle">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <img 
-                src={logoImage} 
-                alt="Logo" 
-                className="h-10 w-10 object-contain flex-shrink-0 rounded-xl shadow-glow"
-              />
-              <div className="absolute -inset-1 bg-gradient-primary rounded-xl opacity-20 blur-sm"></div>
-            </div>
+        <div className="p-4 border-b border-border/40">
+          <div className="flex items-center space-x-2">
+            <img 
+              src={logoImage} 
+              alt="Logo" 
+              className="h-8 w-8 object-contain flex-shrink-0 rounded-lg"
+            />
             {!isCollapsed && (
-              <div className="animate-fade-in">
-                <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">Monumental</span>
-                <p className="text-xs text-muted-foreground mt-0.5">Alojamento Local</p>
+              <div>
+                <span className="text-sm font-bold text-foreground">Portal</span>
+                <p className="text-xs text-muted-foreground">AL</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex-1 py-4 space-y-6">
+        <div className="flex-1 py-2">
           {menuGroups.map((group, groupIndex) => (
-            <SidebarGroup key={group.label} className="px-3">
+            <SidebarGroup key={group.label} className="px-2 mb-4">
               {!isCollapsed && (
-                <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider px-3 pb-2">
+                <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 pb-1">
                   {group.label}
                 </SidebarGroupLabel>
               )}
               <SidebarGroupContent>
-                <SidebarMenu className="space-y-2">
-                  {group.items.map((item, index) => (
+                <SidebarMenu className="space-y-1">
+                  {group.items.map((item) => (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton 
                         onClick={() => setCurrentPage(item.id)}
                         className={`
-                          group relative h-12 rounded-xl transition-all duration-300 hover-scale
+                          group relative h-9 rounded-lg transition-all duration-200
                           ${currentPage === item.id 
-                            ? "bg-gradient-primary text-white shadow-glow font-medium" 
-                            : "hover:bg-accent/60 hover:shadow-soft text-foreground/80 hover:text-foreground"
+                            ? "bg-primary text-primary-foreground font-medium" 
+                            : "hover:bg-accent text-foreground/80 hover:text-foreground"
                           }
-                          ${!isCollapsed ? "justify-start pl-4 pr-6" : "justify-center"}
+                          ${!isCollapsed ? "justify-start pl-3 pr-3" : "justify-center"}
                         `}
-                        style={{ animationDelay: `${(groupIndex * 100) + (index * 50)}ms` }}
                       >
-                        <div className={`
-                          flex items-center justify-center w-8 h-8 rounded-lg
-                          ${currentPage === item.id 
-                            ? "bg-white/20" 
-                            : "bg-primary/10 group-hover:bg-primary/20"
-                          }
-                          transition-all duration-300
-                        `}>
-                          <item.icon className="h-4 w-4" />
-                        </div>
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
                         {!isCollapsed && (
-                          <span className="ml-3 text-sm font-medium">{item.title}</span>
-                        )}
-                        {currentPage === item.id && (
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full"></div>
+                          <span className="ml-2 text-sm truncate">{item.title}</span>
                         )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -288,76 +272,54 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
           ))}
           
           {/* Finanças collapsible group */}
-          <SidebarGroup className="px-3">
+          <SidebarGroup className="px-2 mb-4">
             {!isCollapsed && (
-              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wider px-3 pb-2">
+              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 pb-1">
                 Finanças
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu className="space-y-2">
+              <SidebarMenu className="space-y-1">
                 <SidebarMenuItem>
                   <Collapsible open={financesOpen} onOpenChange={setFinancesOpen}>
                     <CollapsibleTrigger className="w-full">
                       <SidebarMenuButton 
                         className={`
-                          group relative h-12 rounded-xl transition-all duration-300 hover-scale w-full
+                          group relative h-9 rounded-lg transition-all duration-200 w-full
                           ${currentPage.startsWith("finances") 
-                            ? "bg-gradient-primary text-white shadow-glow font-medium" 
-                            : "hover:bg-accent/60 hover:shadow-soft text-foreground/80 hover:text-foreground"
+                            ? "bg-primary text-primary-foreground font-medium" 
+                            : "hover:bg-accent text-foreground/80 hover:text-foreground"
                           }
-                          ${!isCollapsed ? "justify-start pl-4 pr-6" : "justify-center"}
+                          ${!isCollapsed ? "justify-start pl-3 pr-3" : "justify-center"}
                         `}
                       >
-                        <div className={`
-                          flex items-center justify-center w-8 h-8 rounded-lg
-                          ${currentPage.startsWith("finances") 
-                            ? "bg-white/20" 
-                            : "bg-primary/10 group-hover:bg-primary/20"
-                          }
-                          transition-all duration-300
-                        `}>
-                          <Banknote className="h-4 w-4" />
-                        </div>
+                        <Banknote className="h-4 w-4 flex-shrink-0" />
                         {!isCollapsed && (
                           <>
-                            <span className="ml-3 text-sm font-medium">Finanças</span>
-                            <ChevronRight className={`h-4 w-4 ml-auto transition-transform duration-300 ${financesOpen ? 'rotate-90' : ''}`} />
+                            <span className="ml-2 text-sm">Finanças</span>
+                            <ChevronRight className={`h-3 w-3 ml-auto transition-transform duration-200 ${financesOpen ? 'rotate-90' : ''}`} />
                           </>
-                        )}
-                        {currentPage.startsWith("finances") && (
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full"></div>
                         )}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     {!isCollapsed && (
                       <CollapsibleContent className="animate-accordion-down">
-                        <div className="ml-4 mt-2 space-y-2 border-l border-border/30 pl-4">
-                          {financeItems.map((item, index) => (
+                        <div className="ml-6 mt-1 space-y-1">
+                          {financeItems.map((item) => (
                             <SidebarMenuButton
                               key={item.id}
                               onClick={() => setCurrentPage(item.id)}
                               className={`
-                                group relative h-10 rounded-lg transition-all duration-300 hover-scale text-sm w-full
+                                group relative h-8 rounded-md transition-all duration-200 text-sm w-full
                                 ${currentPage === item.id 
-                                  ? "bg-primary/20 text-primary font-medium shadow-soft" 
-                                  : "hover:bg-accent/40 text-foreground/70 hover:text-foreground"
+                                  ? "bg-primary/20 text-primary font-medium" 
+                                  : "hover:bg-accent/60 text-foreground/70 hover:text-foreground"
                                 }
-                                justify-start pl-3 pr-4
+                                justify-start pl-2 pr-2
                               `}
-                              style={{ animationDelay: `${index * 100}ms` }}
                             >
-                              <div className={`
-                                flex items-center justify-center w-6 h-6 rounded-md
-                                ${currentPage === item.id 
-                                  ? "bg-primary/20" 
-                                  : "bg-primary/10 group-hover:bg-primary/20"
-                                }
-                                transition-all duration-300
-                              `}>
-                                <item.icon className="h-3 w-3" />
-                              </div>
-                              <span className="ml-2">{item.title}</span>
+                              <item.icon className="h-3 w-3 flex-shrink-0" />
+                              <span className="ml-2 truncate">{item.title}</span>
                             </SidebarMenuButton>
                           ))}
                         </div>
@@ -369,19 +331,6 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
             </SidebarGroupContent>
           </SidebarGroup>
         </div>
-
-        {/* Footer */}
-        {!isCollapsed && (
-          <div className="p-4 border-t border-border/20 bg-gradient-subtle">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Portal v2.1.0</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                <span>Online</span>
-              </div>
-            </div>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );
