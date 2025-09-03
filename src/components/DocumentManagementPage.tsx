@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Upload, Download, Trash2, Eye, Calendar, Search, Building } from "lucide-react";
+import { FileText, Upload, Download, Trash2, Eye, Calendar, Search, Building, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "@/components/ui/use-toast";
 
 interface Document {
@@ -80,7 +81,7 @@ export const DocumentManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [selectedProperty, setSelectedProperty] = useState<string>("all");
+  const [expandedProperties, setExpandedProperties] = useState<Record<string, boolean>>({});
 
   const properties = ["Apartamento Centro Porto", "Casa Vila Nova de Gaia", "Loft Ribeira"];
   
@@ -89,9 +90,8 @@ export const DocumentManagementPage = () => {
                          doc.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || doc.category === selectedCategory;
     const matchesStatus = selectedStatus === "all" || doc.status === selectedStatus;
-    const matchesProperty = selectedProperty === "all" || doc.propertyName === selectedProperty;
     
-    return matchesSearch && matchesCategory && matchesStatus && matchesProperty;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   // Group documents by property
@@ -99,6 +99,13 @@ export const DocumentManagementPage = () => {
     acc[property] = filteredDocuments.filter(doc => doc.propertyName === property);
     return acc;
   }, {} as Record<string, Document[]>);
+
+  const toggleProperty = (property: string) => {
+    setExpandedProperties(prev => ({
+      ...prev,
+      [property]: !prev[property]
+    }));
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -230,7 +237,7 @@ export const DocumentManagementPage = () => {
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border z-50">
                   <SelectItem value="all">Todas as Categorias</SelectItem>
                   {documentCategories.map((category) => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
@@ -242,23 +249,11 @@ export const DocumentManagementPage = () => {
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Estado" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border z-50">
                   <SelectItem value="all">Todos os Estados</SelectItem>
                   <SelectItem value="active">Ativo</SelectItem>
                   <SelectItem value="expired">Expirado</SelectItem>
                   <SelectItem value="expiring-soon">A Expirar</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                <SelectTrigger className="w-52">
-                  <SelectValue placeholder="Propriedade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as Propriedades</SelectItem>
-                  {properties.map((property) => (
-                    <SelectItem key={property} value={property}>{property}</SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -266,66 +261,69 @@ export const DocumentManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Documents by Property */}
-      {selectedProperty === "all" ? (
-        // Show organized by property folders
-        <div className="space-y-8">
-          {Object.entries(documentsByProperty).map(([property, docs]) => (
-            docs.length > 0 && (
-              <Card key={property} className="shadow-soft">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Building className="h-5 w-5 text-primary" />
+      {/* Documents by Property - Collapsible Dropdowns */}
+      <div className="space-y-4">
+        {Object.entries(documentsByProperty).map(([property, docs]) => (
+          docs.length > 0 && (
+            <Card key={property} className="shadow-soft">
+              <Collapsible 
+                open={expandedProperties[property]} 
+                onOpenChange={() => toggleProperty(property)}
+              >
+                <CollapsibleTrigger className="w-full">
+                  <CardHeader className="hover:bg-accent/50 transition-colors cursor-pointer">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Building className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-left">{property}</CardTitle>
+                          <CardDescription className="text-left">
+                            {docs.length} documento(s)
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className="text-xs">
+                          {docs.filter(d => d.status === 'active').length} Ativos
+                        </Badge>
+                        {expandedProperties[property] ? (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{property}</CardTitle>
-                      <CardDescription>{docs.length} documento(s)</CardDescription>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent className="animate-accordion-down">
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {docs.map((doc) => (
+                        <DocumentCard key={doc.id} doc={doc} onDelete={handleDeleteDocument} />
+                      ))}
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {docs.map((doc) => (
-                      <DocumentCard key={doc.id} doc={doc} onDelete={handleDeleteDocument} />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          ))}
-          {filteredDocuments.length === 0 && (
-            <div className="text-center py-12">
-              <FileText className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                Nenhum documento encontrado
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Carregue o primeiro documento para começar
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        // Show single property view
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDocuments.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <FileText className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                Nenhum documento encontrado
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Carregue o primeiro documento para começar
-              </p>
-            </div>
-          ) : (
-            filteredDocuments.map((doc) => (
-              <DocumentCard key={doc.id} doc={doc} onDelete={handleDeleteDocument} />
-            ))
-          )}
-        </div>
-      )}
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+          )
+        ))}
+        
+        {filteredDocuments.length === 0 && (
+          <div className="text-center py-12">
+            <FileText className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium text-muted-foreground mb-2">
+              Nenhum documento encontrado
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Carregue o primeiro documento para começar
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

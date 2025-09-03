@@ -5,9 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
-import { MessageCircle, Send, Search, Filter, Settings, Reply, User, X } from "lucide-react";
+import { MessageCircle, Send, Search, Settings, User, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -166,6 +165,53 @@ export const MessagesPage = () => {
           <Settings className="h-4 w-4 mr-2" />
           Configurar Integrações
         </Button>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <Card className="shadow-soft">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{messages.length}</p>
+              </div>
+              <MessageCircle className="h-8 w-8 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="shadow-soft">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Não Lidas</p>
+                <p className="text-2xl font-bold text-destructive">
+                  {messages.filter(m => m.status === 'unread').length}
+                </p>
+              </div>
+              <Badge variant="destructive">
+                {messages.filter(m => m.status === 'unread').length}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="shadow-soft">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Respondidas</p>
+                <p className="text-2xl font-bold text-success">
+                  {messages.filter(m => m.status === 'replied').length}
+                </p>
+              </div>
+              <Badge className="bg-success text-success-foreground">
+                {messages.filter(m => m.status === 'replied').length}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Chat Interface Layout */}
@@ -383,76 +429,6 @@ export const MessagesPage = () => {
           )}
         </Card>
       </div>
-
-      {/* Message Detail Dialog */}
-      {selectedMessage && (
-        <Dialog open={!!selectedMessage} onOpenChange={() => setSelectedMessage(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center space-x-3">
-                <span>{selectedMessage.subject}</span>
-                <Badge className={getPlatformColor(selectedMessage.platform)}>
-                  {selectedMessage.platform === "booking" ? "Booking.com" : "Airbnb"}
-                </Badge>
-              </DialogTitle>
-              <DialogDescription>
-                Conversa com {selectedMessage.guestName}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              {/* Conversation */}
-              <div className="space-y-4 max-h-60 overflow-y-auto">
-                {selectedMessage.conversation.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.sender === "host" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        msg.sender === "host"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
-                      <p className="text-sm">{msg.message}</p>
-                      <p className={`text-xs mt-1 ${
-                        msg.sender === "host" ? "text-primary-foreground/70" : "text-muted-foreground"
-                      }`}>
-                        {formatTimestamp(msg.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Reply */}
-              <div className="space-y-4 border-t pt-4">
-                <div>
-                  <Label htmlFor="reply">Sua Resposta</Label>
-                  <Textarea
-                    id="reply"
-                    placeholder="Escreva a sua resposta..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    rows={4}
-                  />
-                </div>
-                
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setSelectedMessage(null)}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleSendReply}>
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar Resposta
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };
