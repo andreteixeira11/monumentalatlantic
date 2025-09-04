@@ -45,10 +45,11 @@ const occupancyData = [
   { month: "Jun", occupancy: 88 },
 ];
 
-const propertyTypeData = [
-  { name: "T1", value: 35, color: "hsl(217, 91%, 60%)" },
-  { name: "T2", value: 45, color: "hsl(217, 91%, 70%)" },
-  { name: "T3", value: 20, color: "hsl(230, 91%, 65%)" },
+const propertyPlatformData = [
+  { name: "Airbnb", value: 45, color: "hsl(217, 91%, 60%)" },
+  { name: "Booking.com", value: 30, color: "hsl(142, 76%, 36%)" },
+  { name: "VRBO", value: 15, color: "hsl(48, 96%, 53%)" },
+  { name: "Direto", value: 10, color: "hsl(262, 83%, 58%)" },
 ];
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
@@ -549,23 +550,23 @@ const DashboardContent = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>Distribuição por Tipo</CardTitle>
+            <CardTitle>Distribuição por Plataforma</CardTitle>
             <CardDescription>
-              Percentagem de propriedades por tipologia
+              Percentagem de reservas por plataforma
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={propertyTypeData}
+                  data={propertyPlatformData}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}%`}
                 >
-                  {propertyTypeData.map((entry, index) => (
+                  {propertyPlatformData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
