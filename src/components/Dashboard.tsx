@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Area } from "recharts";
 import { Calendar, Euro, Star, TrendingUp, Users, Home, LogOut, CalendarDays, BookOpen, Menu, UserCheck, Banknote, MessageCircle, StarIcon, Building, User, ChevronRight, Receipt, PieChart as PieChartIcon, Settings, FileText, CreditCard, UsersIcon, FileTextIcon, Lock } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -339,120 +339,205 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
 const DashboardContent = () => {
   return (
     <div>
-      {/* Stats Cards */}
+      {/* Premium Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="shadow-soft">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-success/10 via-background to-success/5 border-success/20 shadow-strong hover:shadow-glow transition-all duration-300 animate-fade-in">
+          <div className="absolute inset-0 bg-gradient-to-r from-success/5 to-transparent"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-muted-foreground">
               Receita Total
             </CardTitle>
-            <Euro className="h-4 w-4 text-success" />
+            <div className="p-2 rounded-lg bg-success/10 backdrop-blur-sm">
+              <Euro className="h-5 w-5 text-success" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">€12,486</div>
-            <p className="text-xs text-success flex items-center mt-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent">
+              €12,486
+            </div>
+            <p className="text-xs text-success flex items-center mt-2 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" />
               +12.5% vs mês anterior
             </p>
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-primary/5 border-primary/20 shadow-strong hover:shadow-glow transition-all duration-300 animate-fade-in">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-muted-foreground">
               Taxa Ocupação
             </CardTitle>
-            <Calendar className="h-4 w-4 text-primary" />
+            <div className="p-2 rounded-lg bg-primary/10 backdrop-blur-sm">
+              <Calendar className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">88%</div>
-            <p className="text-xs text-primary flex items-center mt-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              88%
+            </div>
+            <p className="text-xs text-primary flex items-center mt-2 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" />
               +5.2% vs mês anterior
             </p>
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-warning/10 via-background to-warning/5 border-warning/20 shadow-strong hover:shadow-glow transition-all duration-300 animate-fade-in">
+          <div className="absolute inset-0 bg-gradient-to-r from-warning/5 to-transparent"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-muted-foreground">
               Hóspedes Totais
             </CardTitle>
-            <Users className="h-4 w-4 text-warning" />
+            <div className="p-2 rounded-lg bg-warning/10 backdrop-blur-sm">
+              <Users className="h-5 w-5 text-warning" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">246</div>
-            <p className="text-xs text-warning flex items-center mt-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-warning to-warning/80 bg-clip-text text-transparent">
+              246
+            </div>
+            <p className="text-xs text-warning flex items-center mt-2 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" />
               +8.1% vs mês anterior
             </p>
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-accent/10 via-background to-accent/5 border-accent/20 shadow-strong hover:shadow-glow transition-all duration-300 animate-fade-in">
+          <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent"></div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold text-muted-foreground">
               Avaliação Média
             </CardTitle>
-            <Star className="h-4 w-4 text-yellow-500" />
+            <div className="p-2 rounded-lg bg-accent/10 backdrop-blur-sm">
+              <Star className="h-5 w-5 text-accent fill-current" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4.8</div>
-            <p className="text-xs text-muted-foreground mt-1">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
+              4.8
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 font-medium">
               Baseado em 127 avaliações
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts */}
+      {/* Modern Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card className="shadow-soft">
-          <CardHeader>
-            <CardTitle>Receita Mensal</CardTitle>
-            <CardDescription>
-              Evolução da receita nos últimos 6 meses
-            </CardDescription>
+        <Card className="relative overflow-hidden bg-gradient-to-br from-background to-primary/5 shadow-strong hover:shadow-glow transition-all duration-300 border-primary/20">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-primary"></div>
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <BarChart className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold">Receita Mensal</CardTitle>
+                <CardDescription className="text-sm">
+                  Evolução da receita nos últimos 6 meses
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-6">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="month" />
-                <YAxis />
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(217, 91%, 60%)" />
+                    <stop offset="100%" stopColor="hsl(217, 91%, 40%)" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" className="opacity-30" />
+                <XAxis 
+                  dataKey="month" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                />
                 <Tooltip 
                   formatter={(value) => [`€${value}`, 'Receita']}
-                  labelStyle={{ color: 'hsl(225, 25%, 15%)' }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
                 />
-                <Bar dataKey="revenue" fill="hsl(217, 91%, 60%)" radius={[4, 4, 0, 0]} />
+                <Bar 
+                  dataKey="revenue" 
+                  fill="url(#revenueGradient)" 
+                  radius={[8, 8, 0, 0]}
+                  stroke="hsl(217, 91%, 60%)"
+                  strokeWidth={1}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="shadow-soft">
-          <CardHeader>
-            <CardTitle>Taxa de Ocupação</CardTitle>
-            <CardDescription>
-              Percentagem de ocupação por mês
-            </CardDescription>
+        <Card className="relative overflow-hidden bg-gradient-to-br from-background to-success/5 shadow-strong hover:shadow-glow transition-all duration-300 border-success/20">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-success to-success/80"></div>
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-success/10">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold">Taxa de Ocupação</CardTitle>
+                <CardDescription className="text-sm">
+                  Percentagem de ocupação por mês
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-6">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={occupancyData}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="month" />
-                <YAxis />
+                <defs>
+                  <linearGradient id="occupancyGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" className="opacity-30" />
+                <XAxis 
+                  dataKey="month" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                />
                 <Tooltip 
                   formatter={(value) => [`${value}%`, 'Ocupação']}
-                  labelStyle={{ color: 'hsl(225, 25%, 15%)' }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="occupancy" 
-                  stroke="hsl(217, 91%, 60%)" 
+                  stroke="hsl(var(--success))" 
                   strokeWidth={3}
-                  dot={{ fill: 'hsl(217, 91%, 60%)', strokeWidth: 2, r: 6 }}
+                  dot={{ fill: 'hsl(var(--success))', strokeWidth: 2, r: 6, stroke: 'hsl(var(--background))' }}
+                  activeDot={{ r: 8, fill: 'hsl(var(--success))', stroke: 'hsl(var(--background))', strokeWidth: 3 }}
                 />
               </LineChart>
             </ResponsiveContainer>
