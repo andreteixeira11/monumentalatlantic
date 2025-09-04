@@ -14,7 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      platforms: {
+        Row: {
+          created_at: string
+          credentials: Json | null
+          external_id: string | null
+          id: string
+          is_connected: boolean | null
+          last_sync: string | null
+          platform_name: string
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credentials?: Json | null
+          external_id?: string | null
+          id?: string
+          is_connected?: boolean | null
+          last_sync?: string | null
+          platform_name: string
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credentials?: Json | null
+          external_id?: string | null
+          id?: string
+          is_connected?: boolean | null
+          last_sync?: string | null
+          platform_name?: string
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platforms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          package_tier: string | null
+          phone: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          package_tier?: string | null
+          phone?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          package_tier?: string | null
+          phone?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string | null
+          amenities: Json | null
+          area_m2: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          description: string | null
+          id: string
+          images: Json | null
+          max_guests: number | null
+          name: string
+          property_type: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          amenities?: Json | null
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: Json | null
+          max_guests?: number | null
+          name: string
+          property_type?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          amenities?: Json | null
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: Json | null
+          max_guests?: number | null
+          name?: string
+          property_type?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          check_in: string
+          check_out: string
+          created_at: string
+          external_id: string | null
+          guest_email: string | null
+          guest_name: string
+          guest_phone: string | null
+          guests_count: number | null
+          id: string
+          platform: string | null
+          property_id: string
+          status: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          check_in: string
+          check_out: string
+          created_at?: string
+          external_id?: string | null
+          guest_email?: string | null
+          guest_name: string
+          guest_phone?: string | null
+          guests_count?: number | null
+          id?: string
+          platform?: string | null
+          property_id: string
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string
+          created_at?: string
+          external_id?: string | null
+          guest_email?: string | null
+          guest_name?: string
+          guest_phone?: string | null
+          guests_count?: number | null
+          id?: string
+          platform?: string | null
+          property_id?: string
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
