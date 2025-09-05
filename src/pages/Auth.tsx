@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { Building2, Loader2 } from 'lucide-react';
+import { Building2, Loader2, Check } from 'lucide-react';
 
 const Auth = () => {
   const { user, signIn, signUp, loading: authLoading } = useAuth();
@@ -17,6 +19,8 @@ const Auth = () => {
     password: '',
     fullName: '',
     confirmPassword: '',
+    packageTier: 'basic',
+    paymentFrequency: 'monthly'
   });
 
   // Redirect if already authenticated
@@ -158,6 +162,63 @@ const Auth = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                   required={!isLogin}
                 />
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Escolha o seu plano</Label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { id: 'basic', name: 'Basic', price: '€29', features: ['1 propriedade', 'Suporte básico'] },
+                      { id: 'premium', name: 'Premium', price: '€59', features: ['5 propriedades', 'Integrações avançadas', 'Suporte prioritário'] },
+                      { id: 'deluxe', name: 'Deluxe', price: '€99', features: ['Propriedades ilimitadas', 'Todas as funcionalidades', 'Suporte 24/7'] }
+                    ].map((plan) => (
+                      <div
+                        key={plan.id}
+                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                          formData.packageTier === plan.id 
+                            ? 'border-primary bg-primary/5' 
+                            : 'border-muted hover:border-primary/50'
+                        }`}
+                        onClick={() => setFormData(prev => ({ ...prev, packageTier: plan.id }))}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">{plan.name}</span>
+                              <Badge variant="secondary">{plan.price}</Badge>
+                            </div>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {plan.features.join(' • ')}
+                            </div>
+                          </div>
+                          {formData.packageTier === plan.id && (
+                            <Check className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="paymentFrequency">Frequência de pagamento</Label>
+                  <Select 
+                    value={formData.paymentFrequency} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, paymentFrequency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Mensal</SelectItem>
+                      <SelectItem value="quarterly">Trimestral (-10%)</SelectItem>
+                      <SelectItem value="annual">Anual (-20%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 

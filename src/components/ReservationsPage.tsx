@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Search, Users, MapPin, Euro, Clock } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -263,16 +264,18 @@ export const ReservationsPage = () => {
               />
             </div>
             <div className="flex gap-2">
-              {["all", "confirmed", "pending", "completed", "cancelled"].map((status) => (
-                <Button
-                  key={status}
-                  variant={statusFilter === status ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter(status)}
-                >
-                  {status === "all" ? "Todas" : getStatusText(status)}
-                </Button>
-              ))}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="confirmed">Confirmadas</SelectItem>
+                  <SelectItem value="pending">Pendentes</SelectItem>
+                  <SelectItem value="completed">Concluídas</SelectItem>
+                  <SelectItem value="cancelled">Canceladas</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

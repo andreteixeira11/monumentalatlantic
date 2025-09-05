@@ -139,12 +139,28 @@ export const MessagesPage = () => {
       return;
     }
 
+    if (!selectedMessage) return;
+
+    // Add the new message to the conversation
+    const newMessage = {
+      sender: "host" as const,
+      message: replyText,
+      timestamp: new Date().toISOString()
+    };
+
+    setSelectedMessage(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        conversation: [...prev.conversation, newMessage]
+      };
+    });
+
     toast({
       title: "Mensagem Enviada",
       description: "A sua resposta foi enviada com sucesso.",
     });
     setReplyText("");
-    // Removed setSelectedMessage(null) to keep conversation open
   };
 
   const formatTimestamp = (timestamp: string) => {

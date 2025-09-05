@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { Send, CheckCircle, XCircle, Link, Copy, Users, Clock, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { GuestDetailsModal } from "./GuestDetailsModal";
 
 interface GuestRegistry {
   id: string;
@@ -70,6 +71,8 @@ const mockGuestRegistries: GuestRegistry[] = [
 export const GuestRegistryPage = () => {
   const [isConfigured, setIsConfigured] = useState(false);
   const [registries] = useState<GuestRegistry[]>(mockGuestRegistries);
+  const [selectedRegistry, setSelectedRegistry] = useState<GuestRegistry | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
@@ -143,6 +146,11 @@ export const GuestRegistryPage = () => {
       title: "Link Copiado",
       description: "O link foi copiado para a área de transferência.",
     });
+  };
+
+  const handleRegistryClick = (registry: GuestRegistry) => {
+    setSelectedRegistry(registry);
+    setIsDetailsModalOpen(true);
   };
 
   return (
@@ -250,7 +258,8 @@ export const GuestRegistryPage = () => {
             {registries.map((registry) => (
               <div
                 key={registry.id}
-                className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => handleRegistryClick(registry)}
               >
                 <div className="space-y-2">
                   <div className="flex items-center space-x-4">
@@ -283,7 +292,7 @@ export const GuestRegistryPage = () => {
                     Check-in: {registry.checkInDate} | Check-out: {registry.checkOutDate}
                   </div>
                   {registry.guestFormLink && (
-                    <div className="mt-2 flex items-center space-x-2">
+                    <div className="mt-2 flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                       <Input 
                         value={registry.guestFormLink} 
                         readOnly 
@@ -300,7 +309,7 @@ export const GuestRegistryPage = () => {
                   )}
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
                   {registry.status === "link-sent" ? (
                     <Button
                       size="sm"
@@ -354,6 +363,12 @@ export const GuestRegistryPage = () => {
           )}
         </CardContent>
       </Card>
+
+      <GuestDetailsModal
+        registry={selectedRegistry}
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+      />
     </div>
   );
 };

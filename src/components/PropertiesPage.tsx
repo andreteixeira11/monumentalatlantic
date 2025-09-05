@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Plus, Home, MapPin, Users, Bed, Bath, Square, Edit, Trash2, Settings, Wifi, Car, TvIcon, AirVent, CheckCircle, Clock, Link, Building, Receipt, Bell, FileText, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Property {
   id: string;
@@ -119,7 +121,17 @@ export const PropertiesPage = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [onboardingProperty, setOnboardingProperty] = useState<Property | null>(null);
   const [onboardingStep, setOnboardingStep] = useState(1);
+  const [newProperty, setNewProperty] = useState({
+    name: '',
+    address: '',
+    propertyType: '',
+    bedrooms: 1,
+    bathrooms: 1,
+    maxGuests: 2,
+    area: 0
+  });
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -176,6 +188,97 @@ export const PropertiesPage = () => {
   const handlePrevStep = () => {
     if (onboardingStep > 1) {
       setOnboardingStep(onboardingStep - 1);
+    }
+  };
+
+  const handleCreateProperty = async () => {
+    if (!newProperty.name || !newProperty.address || !newProperty.propertyType) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Utilizador não autenticado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .insert([{
+          name: newProperty.name,
+          address: newProperty.address,
+          property_type: newProperty.propertyType,
+          bedrooms: newProperty.bedrooms,
+          bathrooms: newProperty.bathrooms,
+          max_guests: newProperty.maxGuests,
+          area_m2: newProperty.area,
+          user_id: user.id
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const createdProperty: Property = {
+        id: data.id,
+        name: data.name,
+        address: data.address,
+        propertyType: data.property_type,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        maxGuests: data.max_guests,
+        area: data.area_m2,
+        status: "ativo",
+        amenities: [],
+        description: "",
+        images: [],
+        isOnboarded: false,
+        platforms: {
+          airbnb: { connected: false },
+          booking: { connected: false },
+          vrbo: { connected: false }
+        },
+        touristTax: { enabled: false },
+        smartLock: { connected: false },
+        notifications: { emailEnabled: false, smsEnabled: false }
+      };
+
+      setProperties(prev => [...prev, createdProperty]);
+      setIsAddModalOpen(false);
+      setNewProperty({
+        name: '',
+        address: '',
+        propertyType: '',
+        bedrooms: 1,
+        bathrooms: 1,
+        maxGuests: 2,
+        area: 0
+      });
+
+      toast({
+        title: "Propriedade Criada",
+        description: "A propriedade foi criada com sucesso!",
+      });
+
+      // Start onboarding automatically
+      startOnboarding(createdProperty);
+
+    } catch (error) {
+      console.error('Error creating property:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar a propriedade. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -460,15 +563,25 @@ export const PropertiesPage = () => {
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="col-span-2">
                 <Label htmlFor="name">Nome da Propriedade</Label>
-                <Input id="name" placeholder="Ex: Apartamento Centro Porto" />
+                <Input 
+                  id="name" 
+                  placeholder="Ex: Apartamento Centro Porto"
+                  value={newProperty.name}
+                  onChange={(e) => setNewProperty(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div className="col-span-2">
                 <Label htmlFor="address">Morada Completa</Label>
-                <Input id="address" placeholder="Rua, número, código postal, cidade" />
+                <Input 
+                  id="address" 
+                  placeholder="Rua, número, código postal, cidade"
+                  value={newProperty.address}
+                  onChange={(e) => setNewProperty(prev => ({ ...prev, address: e.target.value }))}
+                />
               </div>
               <div>
                 <Label htmlFor="type">Tipo de Propriedade</Label>
-                <Select>
+                <Select value={newProperty.propertyType} onValueChange={(value) => setNewProperty(prev => ({ ...prev, propertyType: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecionar tipo" />
                   </SelectTrigger>
@@ -482,22 +595,40 @@ export const PropertiesPage = () => {
               </div>
               <div>
                 <Label htmlFor="bedrooms">Quartos</Label>
-                <Input id="bedrooms" type="number" placeholder="2" />
+                <Input 
+                  id="bedrooms" 
+                  type="number" 
+                  placeholder="2"
+                  value={newProperty.bedrooms}
+                  onChange={(e) => setNewProperty(prev => ({ ...prev, bedrooms: parseInt(e.target.value) || 1 }))}
+                />
               </div>
               <div>
                 <Label htmlFor="bathrooms">Casas de Banho</Label>
-                <Input id="bathrooms" type="number" placeholder="1" />
+                <Input 
+                  id="bathrooms" 
+                  type="number" 
+                  placeholder="1"
+                  value={newProperty.bathrooms}
+                  onChange={(e) => setNewProperty(prev => ({ ...prev, bathrooms: parseInt(e.target.value) || 1 }))}
+                />
               </div>
               <div>
                 <Label htmlFor="max-guests">Máx. Hóspedes</Label>
-                <Input id="max-guests" type="number" placeholder="4" />
+                <Input 
+                  id="max-guests" 
+                  type="number" 
+                  placeholder="4"
+                  value={newProperty.maxGuests}
+                  onChange={(e) => setNewProperty(prev => ({ ...prev, maxGuests: parseInt(e.target.value) || 2 }))}
+                />
               </div>
             </div>
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={() => setIsAddModalOpen(false)}>
+              <Button onClick={handleCreateProperty}>
                 Criar Propriedade
               </Button>
             </div>

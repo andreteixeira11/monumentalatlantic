@@ -6,6 +6,8 @@ import { FileText, Upload, Download, Trash2, Eye, Calendar, Search, Building, Ch
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 
 interface Document {
@@ -107,14 +109,28 @@ export const DocumentManagementPage = () => {
     }));
   };
 
+  const [selectedProperty, setSelectedProperty] = useState<string>("");
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
+      if (!selectedProperty) {
+        toast({
+          title: "Propriedade obrigatória",
+          description: "Por favor, selecione uma propriedade antes de carregar o documento.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Simular upload de ficheiro
       toast({
         title: "Ficheiro carregado",
-        description: `${files[0].name} foi carregado com sucesso.`,
+        description: `${files[0].name} foi carregado para ${selectedProperty}.`,
       });
+      setShowUploadDialog(false);
+      setSelectedProperty("");
     }
   };
 
@@ -147,20 +163,50 @@ export const DocumentManagementPage = () => {
           </p>
         </div>
         
-        <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-          <input
-            type="file"
-            accept=".pdf,.doc,.docx,.jpg,.png"
-            onChange={handleFileUpload}
-            className="hidden"
-            id="file-upload"
-            multiple
-          />
-          <Button onClick={() => document.getElementById('file-upload')?.click()}>
-            <Upload className="h-4 w-4 mr-2" />
-            Carregar Documentos
-          </Button>
-        </div>
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogTrigger asChild>
+            <Button>
+              <Upload className="h-4 w-4 mr-2" />
+              Carregar Documentos
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Carregar Documentos</DialogTitle>
+              <DialogDescription>
+                Selecione a propriedade e carregue os documentos
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="property-select">Propriedade *</Label>
+                <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma propriedade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {properties.map((property) => (
+                      <SelectItem key={property} value={property}>
+                        {property}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="file-input">Ficheiros</Label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.png"
+                  onChange={handleFileUpload}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  id="file-input"
+                  multiple
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Statistics */}
