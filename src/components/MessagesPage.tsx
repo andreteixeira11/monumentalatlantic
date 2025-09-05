@@ -144,7 +144,7 @@ export const MessagesPage = () => {
       description: "A sua resposta foi enviada com sucesso.",
     });
     setReplyText("");
-    setSelectedMessage(null);
+    // Removed setSelectedMessage(null) to keep conversation open
   };
 
   const formatTimestamp = (timestamp: string) => {

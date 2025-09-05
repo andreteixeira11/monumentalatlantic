@@ -20,6 +20,7 @@ import { BillingPage } from "./BillingPage";
 import { StaffManagementPage } from "./StaffManagementPage";
 import { TemplatesPage } from "./TemplatesPage";
 import { SmartLockPage } from "./SmartLockPage";
+import { PropertiesPage } from "./PropertiesPage";
 import { ProfileEditModal } from "./ProfileEditModal";
 import logoImage from "@/assets/logo.png";
 
@@ -54,7 +55,7 @@ const propertyPlatformData = [
 
 export const Dashboard = ({ onLogout }: DashboardProps) => {
   const [currentPage, setCurrentPage] = useState<
-    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock"
+    "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock" | "properties"
   >("dashboard");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -99,6 +100,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
         return <TemplatesPage />;
       case "smart-lock":
         return <SmartLockPage />;
+      case "properties":
+        return <PropertiesPage />;
       default:
         return <DashboardContent />;
     }
@@ -166,8 +169,8 @@ export const Dashboard = ({ onLogout }: DashboardProps) => {
 };
 
 const AppSidebar = ({ currentPage, setCurrentPage }: { 
-  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock"; 
-  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock") => void;
+  currentPage: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock" | "properties"; 
+  setCurrentPage: (page: "dashboard" | "reservations" | "calendar" | "guests" | "finances-report" | "finances-expenses" | "messages" | "reviews" | "tourist-tax" | "configurations" | "documents" | "billing" | "staff" | "templates" | "smart-lock" | "properties") => void;
 }) => {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -178,6 +181,7 @@ const AppSidebar = ({ currentPage, setCurrentPage }: {
       label: "Principal",
       items: [
         { id: "dashboard" as const, title: "Dashboard", icon: Home, gradient: true },
+        { id: "properties" as const, title: "Propriedades", icon: Building },
         { id: "reservations" as const, title: "Reservas", icon: BookOpen },
         { id: "calendar" as const, title: "Timeline", icon: CalendarDays },
         { id: "guests" as const, title: "Registo Hóspedes", icon: UserCheck },
