@@ -176,6 +176,89 @@ export const PropertiesPage = () => {
     startOnboarding(property);
   };
 
+  const handleAirbnbConnect = async () => {
+    if (!onboardingProperty) return;
+
+    try {
+      const response = await supabase.functions.invoke('airbnb-oauth', {
+        body: {
+          action: 'authorize',
+          property_id: onboardingProperty.id
+        }
+      });
+
+      if (response.data?.success && response.data?.auth_url) {
+        // Open Airbnb OAuth in new window
+        const popup = window.open(
+          response.data.auth_url,
+          'airbnb-auth',
+          'width=600,height=700,scrollbars=yes,resizable=yes'
+        );
+
+        // Listen for OAuth completion
+        const checkClosed = setInterval(() => {
+          if (popup?.closed) {
+            clearInterval(checkClosed);
+            // Refresh property status
+            checkAirbnbConnection();
+          }
+        }, 1000);
+
+        toast({
+          title: "Redireccionamento",
+          description: "A abrir janela de autenticação do Airbnb...",
+        });
+      } else {
+        throw new Error(response.data?.error || 'Erro ao iniciar autenticação');
+      }
+    } catch (error) {
+      console.error('Error connecting to Airbnb:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível conectar com o Airbnb. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const checkAirbnbConnection = async () => {
+    if (!onboardingProperty) return;
+
+    try {
+      const { data: platforms } = await supabase
+        .from('platforms')
+        .select('*')
+        .eq('property_id', onboardingProperty.id)
+        .eq('platform_name', 'airbnb')
+        .single();
+
+      if (platforms?.is_connected) {
+        // Parse credentials safely
+        const credentials = platforms.credentials as any;
+        const accountInfo = credentials?.account_info;
+        
+        // Update the onboarding property state
+        setOnboardingProperty(prev => prev ? {
+          ...prev,
+          platforms: {
+            ...prev.platforms,
+            airbnb: {
+              connected: true,
+              accountId: accountInfo?.email || accountInfo?.first_name || 'Conta Conectada'
+            }
+          }
+        } : null);
+
+        toast({
+          title: "Conectado com Sucesso",
+          description: "A sua conta Airbnb foi conectada com sucesso!",
+        });
+      }
+    } catch (error) {
+      console.error('Error checking Airbnb connection:', error);
+    }
+  };
+
   const handleNextStep = () => {
     if (onboardingStep < 5) {
       setOnboardingStep(onboardingStep + 1);
@@ -347,10 +430,22 @@ export const PropertiesPage = () => {
                     </div>
                     <div>
                       <h4 className="font-medium">Airbnb</h4>
-                      <p className="text-sm text-muted-foreground">Conectar com a sua conta Airbnb</p>
+                      <p className="text-sm text-muted-foreground">
+                        {onboardingProperty?.platforms?.airbnb?.connected 
+                          ? `Conectado como ${onboardingProperty.platforms.airbnb.accountId}`
+                          : 'Conectar com a sua conta Airbnb'
+                        }
+                      </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm">Conectar</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleAirbnbConnect()}
+                    disabled={onboardingProperty?.platforms?.airbnb?.connected}
+                  >
+                    {onboardingProperty?.platforms?.airbnb?.connected ? 'Conectado' : 'Conectar com Airbnb'}
+                  </Button>
                 </div>
               </Card>
               
