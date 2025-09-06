@@ -118,6 +118,8 @@ export const PropertiesPage = () => {
   const [properties, setProperties] = useState<Property[]>(mockProperties);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editProperty, setEditProperty] = useState<Property | null>(null);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [onboardingProperty, setOnboardingProperty] = useState<Property | null>(null);
   const [onboardingStep, setOnboardingStep] = useState(1);
@@ -163,6 +165,15 @@ export const PropertiesPage = () => {
     setOnboardingProperty(property);
     setOnboardingStep(1);
     setIsOnboardingOpen(true);
+  };
+
+  const handleEditProperty = (property: Property) => {
+    setEditProperty(property);
+    setIsEditModalOpen(true);
+  };
+
+  const handleConfigureProperty = (property: Property) => {
+    startOnboarding(property);
   };
 
   const handleNextStep = () => {
@@ -718,11 +729,19 @@ export const PropertiesPage = () => {
               {/* Actions */}
               <div className="flex justify-between items-center pt-2 border-t">
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEditProperty(property)}
+                  >
                     <Edit className="h-4 w-4 mr-2" />
                     Editar
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleConfigureProperty(property)}
+                  >
                     <Settings className="h-4 w-4 mr-2" />
                     Configurar
                   </Button>
@@ -769,6 +788,133 @@ export const PropertiesPage = () => {
             </Button>
             <Button onClick={handleNextStep}>
               {onboardingStep === 5 ? 'Concluir' : 'Próximo'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Property Dialog */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Propriedade</DialogTitle>
+            <DialogDescription>
+              Modifique os dados da propriedade {editProperty?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editProperty && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-name">Nome da Propriedade</Label>
+                  <Input 
+                    id="edit-name" 
+                    value={editProperty.name}
+                    onChange={(e) => setEditProperty({...editProperty, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-type">Tipo de Propriedade</Label>
+                  <Select 
+                    value={editProperty.propertyType}
+                    onValueChange={(value) => setEditProperty({...editProperty, propertyType: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="apartamento">Apartamento</SelectItem>
+                      <SelectItem value="casa">Casa</SelectItem>
+                      <SelectItem value="quarto">Quarto</SelectItem>
+                      <SelectItem value="villa">Villa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-address">Morada</Label>
+                <Input 
+                  id="edit-address" 
+                  value={editProperty.address}
+                  onChange={(e) => setEditProperty({...editProperty, address: e.target.value})}
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="edit-bedrooms">Quartos</Label>
+                  <Input 
+                    id="edit-bedrooms" 
+                    type="number" 
+                    min="1"
+                    value={editProperty.bedrooms}
+                    onChange={(e) => setEditProperty({...editProperty, bedrooms: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-bathrooms">Casas de Banho</Label>
+                  <Input 
+                    id="edit-bathrooms" 
+                    type="number" 
+                    min="1"
+                    value={editProperty.bathrooms}
+                    onChange={(e) => setEditProperty({...editProperty, bathrooms: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-guests">Máx. Hóspedes</Label>
+                  <Input 
+                    id="edit-guests" 
+                    type="number" 
+                    min="1"
+                    value={editProperty.maxGuests}
+                    onChange={(e) => setEditProperty({...editProperty, maxGuests: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-area">Área (m²)</Label>
+                  <Input 
+                    id="edit-area" 
+                    type="number" 
+                    min="1"
+                    value={editProperty.area}
+                    onChange={(e) => setEditProperty({...editProperty, area: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-description">Descrição</Label>
+                <Textarea 
+                  id="edit-description" 
+                  rows={3}
+                  value={editProperty.description}
+                  onChange={(e) => setEditProperty({...editProperty, description: e.target.value})}
+                  placeholder="Descreva a sua propriedade..."
+                />
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => {
+              if (editProperty) {
+                setProperties(prev => prev.map(p => 
+                  p.id === editProperty.id ? editProperty : p
+                ));
+                setIsEditModalOpen(false);
+                toast({
+                  title: "Propriedade Atualizada",
+                  description: "As alterações foram guardadas com sucesso.",
+                });
+              }
+            }}>
+              Guardar Alterações
             </Button>
           </div>
         </DialogContent>
